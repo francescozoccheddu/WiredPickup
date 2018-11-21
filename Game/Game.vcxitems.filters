@@ -4,53 +4,59 @@
     <Filter Include="Sources">
       <UniqueIdentifier>{1888d5db-8ddd-4dc3-ab63-d47986359384}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Engine">
+      <UniqueIdentifier>{719d21e7-e429-451e-acba-96f45cf6c74d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Utils">
+      <UniqueIdentifier>{3f087922-daa3-487e-a60d-45238bb38b5b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Input">
+      <UniqueIdentifier>{3f166d16-a573-459d-8810-2dec12d926bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Rendering">
+      <UniqueIdentifier>{1082914b-2dd2-46c7-b1e3-e58b6c264c5d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Resources">
+      <UniqueIdentifier>{6480c5ca-2ebd-4d69-b929-a5ec7f6edcdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{6a2a538f-2831-4050-8778-1e38c948529c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Gamepad.cpp">
+      <Filter>Sources\Input</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DeviceHolder.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Engine</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Dispatcher.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Engine</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Exceptions.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Gamepad.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Utils</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Renderer.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Resource.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Resources</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Storage.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Mesh.cpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ConstantBufferResource.cpp">
+      <Filter>Sources\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\MeshResource.cpp">
+      <Filter>Sources\Resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Renderer.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\EngineListener.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\DeviceHolder.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\Dispatcher.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\Resource.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Windows.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResource.hpp">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\XInput.hpp">
@@ -59,29 +65,64 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Direct3D.hpp">
       <Filter>Sources</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Exceptions.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\WindowRect.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\NonCopyable.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Input\Gamepad.hpp">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\DirectXMath.hpp">
       <Filter>Sources</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Log.hpp">
-      <Filter>Sources</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Input\Gamepad.hpp">
+      <Filter>Sources\Input</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Storage.hpp">
-      <Filter>Sources</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\DeviceHolder.hpp">
+      <Filter>Sources\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\EngineListener.hpp">
+      <Filter>Sources\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\Dispatcher.hpp">
+      <Filter>Sources\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Exceptions.hpp">
+      <Filter>Sources\Utils</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\COMExceptions.hpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Log.hpp">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Renderer.hpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\Resource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Storage.hpp">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\WindowRect.hpp">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\NonCopyable.hpp">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Mesh.hpp">
+      <Filter>Sources\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ConstantBufferResource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\MeshResource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Shaders\default_pixel.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="$(MSBuildThisFileDirectory)Shaders\default_vertex.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
