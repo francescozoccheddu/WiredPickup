@@ -49,6 +49,8 @@ public:
 
 	ShaderResource (Type type);
 
+	static void ResetShader (ID3D11DeviceContext & deviceContext, Type type);
+
 	void SetShader (ID3D11DeviceContext & deviceContext) const;
 
 	void ForceCreate (ID3D11Device & device) override final;

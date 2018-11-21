@@ -2,33 +2,40 @@
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
+#include <vector>
 
 void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers, ShaderResource::Type _shaderType)
 {
 	if (!_buffers.empty ())
 	{
-		ID3D11Buffer ** bufs = new ID3D11Buffer*[_buffers.size ()];
+		std::vector<ID3D11Buffer*> bufs { _buffers.size () };
 		for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
 		{
-			GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
-			bufs[iBuf] = _buffers[iBuf]->m_pBuffer;
+			if (_buffers[iBuf])
+			{
+				GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
+				bufs[iBuf] = _buffers[iBuf]->m_pBuffer;
+			}
+			else
+			{
+				bufs[iBuf] = nullptr;
+			}
 		}
 		switch (_shaderType)
 		{
 			case ShaderResource::Type::VertexShader:
-				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
 			case ShaderResource::Type::PixelShader:
-				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
 			case ShaderResource::Type::GeometryShader:
-				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
 			default:
 				GAME_THROW_MSG ("Unknown type");
 				break;
 		}
-		delete[] bufs;
 	}
 }
 

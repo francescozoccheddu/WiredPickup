@@ -2,6 +2,12 @@
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
+#include "Include\Game\Resources\InputLayoutResource.hpp"
+
+void InputLayoutResource::Reset (ID3D11DeviceContext & _deviceContext)
+{
+	GAME_COMC (_deviceContext.IASetInputLayout (nullptr));
+}
 
 void InputLayoutResource::Set (ID3D11DeviceContext & _deviceContext) const
 {
