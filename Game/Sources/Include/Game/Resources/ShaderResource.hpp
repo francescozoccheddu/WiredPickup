@@ -3,10 +3,8 @@
 #include <Game/Resources/Resource.hpp>
 #include <string>
 
-class ShaderBytecodeProvider
+struct ShaderBytecodeProvider
 {
-
-public:
 
 	virtual ~ShaderBytecodeProvider () = default;
 
@@ -16,18 +14,22 @@ public:
 
 };
 
-class ShaderBytecode final : public ShaderBytecodeProvider
+struct ShaderBytecode : public ShaderBytecodeProvider
 {
-
-public:
 
 	ShaderBytecode () = default;
 
 	ShaderBytecode (const std::vector<char>& bytecode);
 
-	virtual const void * GetData () const override;
+	virtual inline const void * GetData () const override
+	{
+		return bytecode.data ();
+	}
 
-	virtual size_t GetSize () const override;
+	virtual inline size_t GetSize () const override
+	{
+		return static_cast<size_t>(bytecode.size ());
+	}
 
 	std::vector<char> bytecode;
 
@@ -35,75 +37,33 @@ public:
 
 };
 
-class VertexShaderResource final : public Resource
+class ShaderResource : public SingleResource
 {
 
 public:
 
-	~VertexShaderResource () override;
+	enum class Type
+	{
+		VertexShader, PixelShader, GeometryShader
+	};
 
-	VertexShaderResource (const D3D11_INPUT_ELEMENT_DESC * pDescriptions, int cDescriptions);
-
-	void SetShaderAndInputLayout (ID3D11DeviceContext & deviceContext) const;
-
-	void Create (ID3D11Device & device) override final;
-
-	void Destroy () override final;
-
-	bool IsCreated () const override final;
-
-	const ShaderBytecodeProvider * pBytecode { nullptr };
-
-private:
-
-	ID3D11VertexShader * m_pShader { nullptr };
-	ID3D11InputLayout * m_pInputLayout { nullptr };
-	const D3D11_INPUT_ELEMENT_DESC * m_pDescriptions;
-	const int m_cDescriptions;
-
-};
-
-class PixelShaderResource final : public Resource
-{
-
-public:
-
-	~PixelShaderResource () override;
+	ShaderResource (Type type);
 
 	void SetShader (ID3D11DeviceContext & deviceContext) const;
 
-	void Create (ID3D11Device & device) override final;
+	void ForceCreate (ID3D11Device & device) override final;
 
-	void Destroy () override final;
+	void ForceDestroy () override final;
 
 	bool IsCreated () const override final;
+
+	Type GetType () const;
 
 	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 
-	ID3D11PixelShader * m_pShader { nullptr };
+	ID3D11DeviceChild * m_pShader { nullptr };
+	const Type m_Type;
 
-};
-
-class GeometryShaderResource final : public Resource
-{
-
-public:
-
-	~GeometryShaderResource () override;
-
-	void SetShader (ID3D11DeviceContext & deviceContext) const;
-
-	void Create (ID3D11Device & device) override final;
-
-	void Destroy () override final;
-
-	bool IsCreated () const override final;
-
-	const ShaderBytecodeProvider * pBytecode { nullptr };
-
-private:
-
-	ID3D11GeometryShader * m_pShader { nullptr };
 };

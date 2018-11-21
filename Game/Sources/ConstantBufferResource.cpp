@@ -3,50 +3,39 @@
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 
-ID3D11Buffer ** ConstantBufferResource::GatherBuffers (const std::vector<const ConstantBufferResource*>& _buffers)
+void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers, ShaderResource::Type _shaderType)
 {
-	ID3D11Buffer ** bufs = new ID3D11Buffer*[_buffers.size ()];
-	for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
+	if (!_buffers.empty ())
 	{
-		GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
-		bufs[iBuf] = _buffers[iBuf]->m_pBuffer;
+		ID3D11Buffer ** bufs = new ID3D11Buffer*[_buffers.size ()];
+		for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
+		{
+			GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
+			bufs[iBuf] = _buffers[iBuf]->m_pBuffer;
+		}
+		switch (_shaderType)
+		{
+			case ShaderResource::Type::VertexShader:
+				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				break;
+			case ShaderResource::Type::PixelShader:
+				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				break;
+			case ShaderResource::Type::GeometryShader:
+				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
+				break;
+			default:
+				GAME_THROW_MSG ("Unknown type");
+				break;
+		}
+		delete[] bufs;
 	}
-	return bufs;
-}
-
-void ConstantBufferResource::SetForVertexShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers)
-{
-	ID3D11Buffer ** bufs = GatherBuffers (_buffers);
-	_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
-	delete[] bufs;
-}
-
-void ConstantBufferResource::SetForPixelShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers)
-{
-	ID3D11Buffer ** bufs = GatherBuffers (_buffers);
-	_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
-	delete[] bufs;
-}
-
-void ConstantBufferResource::SetForGeometryShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers)
-{
-	ID3D11Buffer ** bufs = GatherBuffers (_buffers);
-	_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs);
-	delete[] bufs;
 }
 
 ConstantBufferResource::ConstantBufferResource (int _size) : m_cBuffer { static_cast<UINT>(_size) }
 {
 	GAME_ASSERT_MSG (_size % 16 == 0, "Size is not a multiple of 16");
 	GAME_ASSERT_MSG (_size / 16 <= D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT, "Size exceeds maximum value");
-}
-
-ConstantBufferResource::~ConstantBufferResource ()
-{
-	if (ConstantBufferResource::IsCreated ())
-	{
-		ConstantBufferResource::Destroy ();
-	}
 }
 
 void ConstantBufferResource::Update (ID3D11DeviceContext & _deviceContext, const void * _pData, int _cData) const
@@ -57,22 +46,26 @@ void ConstantBufferResource::Update (ID3D11DeviceContext & _deviceContext, const
 	_deviceContext.Unmap (m_pBuffer, 0);
 }
 
-void ConstantBufferResource::SetForVertexShader (ID3D11DeviceContext & _deviceContext, int _slot) const
+void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext, int _slot, ShaderResource::Type _shaderType) const
 {
-	_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+	switch (_shaderType)
+	{
+		case ShaderResource::Type::VertexShader:
+			_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		case ShaderResource::Type::PixelShader:
+			_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		case ShaderResource::Type::GeometryShader:
+			_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
+	}
 }
 
-void ConstantBufferResource::SetForPixelShader (ID3D11DeviceContext & _deviceContext, int _slot) const
-{
-	_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
-}
-
-void ConstantBufferResource::SetForGeometryShader (ID3D11DeviceContext & _deviceContext, int _slot) const
-{
-	_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
-}
-
-void ConstantBufferResource::Create (ID3D11Device & _device)
+void ConstantBufferResource::ForceCreate (ID3D11Device & _device)
 {
 	GAME_ASSERT_MSG (!ConstantBufferResource::IsCreated (), "Already created");
 	D3D11_BUFFER_DESC desc;
@@ -85,7 +78,7 @@ void ConstantBufferResource::Create (ID3D11Device & _device)
 	GAME_COMC (_device.CreateBuffer (&desc, nullptr, &m_pBuffer));
 }
 
-void ConstantBufferResource::Destroy ()
+void ConstantBufferResource::ForceDestroy ()
 {
 	GAME_ASSERT_MSG (ConstantBufferResource::IsCreated (), "Not created");
 	m_pBuffer->Release ();

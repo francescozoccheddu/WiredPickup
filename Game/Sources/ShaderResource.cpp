@@ -1,134 +1,87 @@
 #include <Game/Resources/ShaderResource.hpp>
 
-#include <Game/Resources/MeshResource.hpp>
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
+#include <Game/Utils/Storage.hpp>
 
 ShaderBytecode::ShaderBytecode (const std::vector<char>& _bytecode)
 	: bytecode { _bytecode }
 {}
 
-const void * ShaderBytecode::GetData () const
-{
-	return bytecode.data ();
-}
-
-size_t ShaderBytecode::GetSize () const
-{
-	return static_cast<size_t>(bytecode.size ());
-}
-
 const ShaderBytecode ShaderBytecode::CreateFromFile (const std::string & _filename)
 {
-	GAME_THROW_MSG ("Unimplemented");
+	return ShaderBytecode { Storage::LoadBinaryFile (_filename) };
 }
 
-
-VertexShaderResource::VertexShaderResource (const D3D11_INPUT_ELEMENT_DESC * _pDescs, int _cDescs) :
-	m_pDescriptions { _pDescs }, m_cDescriptions { _cDescs }
-{}
-
-VertexShaderResource::~VertexShaderResource ()
+ShaderResource::ShaderResource (Type _type)
+	: m_Type { _type }
 {
-	if (VertexShaderResource::IsCreated ())
+	switch (_type)
 	{
-		VertexShaderResource::Destroy ();
+		case Type::VertexShader:
+		case Type::PixelShader:
+		case Type::GeometryShader:
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
 	}
 }
 
-void VertexShaderResource::SetShaderAndInputLayout (ID3D11DeviceContext & _deviceContext) const
+void ShaderResource::SetShader (ID3D11DeviceContext & _deviceContext) const
 {
 	GAME_ASSERT_MSG (IsCreated (), "Not created");
-	GAME_COMC (_deviceContext.VSSetShader (m_pShader, nullptr, 0));
-	GAME_COMC (_deviceContext.IASetInputLayout (m_pInputLayout));
-}
-
-void VertexShaderResource::Create (ID3D11Device & _device)
-{
-	GAME_ASSERT_MSG (pBytecode, "Bytecode is nullptr");
-	GAME_ASSERT_MSG (!IsCreated (), "Already created");
-	const void * pBytecodeData = pBytecode->GetData ();
-	const SIZE_T bytecodeSize = static_cast<SIZE_T>(pBytecode->GetSize ());
-	GAME_COMC (_device.CreateVertexShader (pBytecodeData, bytecodeSize, nullptr, &m_pShader));
-	GAME_COMC (_device.CreateInputLayout (m_pDescriptions, static_cast<UINT>(m_cDescriptions), pBytecodeData, bytecodeSize, &m_pInputLayout));
-}
-
-void VertexShaderResource::Destroy ()
-{
-	GAME_ASSERT_MSG (IsCreated (), "Not created");
-	m_pShader->Release ();
-	m_pInputLayout->Release ();
-	m_pShader = nullptr;
-	m_pInputLayout = nullptr;
-}
-
-bool VertexShaderResource::IsCreated () const
-{
-	return m_pShader != nullptr;
-}
-
-PixelShaderResource::~PixelShaderResource ()
-{
-	if (PixelShaderResource::IsCreated ())
+	switch (m_Type)
 	{
-		PixelShaderResource::Destroy ();
+		case Type::VertexShader:
+			GAME_COMC (_deviceContext.VSSetShader (reinterpret_cast<ID3D11VertexShader*>(m_pShader), nullptr, 0));
+			break;
+		case Type::PixelShader:
+			GAME_COMC (_deviceContext.PSSetShader (reinterpret_cast<ID3D11PixelShader*>(m_pShader), nullptr, 0));
+			break;
+		case Type::GeometryShader:
+			GAME_COMC (_deviceContext.GSSetShader (reinterpret_cast<ID3D11GeometryShader*>(m_pShader), nullptr, 0));
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
 	}
 }
 
-void PixelShaderResource::SetShader (ID3D11DeviceContext & _deviceContext) const
+void ShaderResource::ForceCreate (ID3D11Device & _device)
 {
-	GAME_ASSERT_MSG (IsCreated (), "Not created");
-	GAME_COMC (_deviceContext.PSSetShader (m_pShader, nullptr, 0));
-}
-
-void PixelShaderResource::Create (ID3D11Device & _device)
-{
-	GAME_ASSERT_MSG (pBytecode, "Bytecode is nullptr");
 	GAME_ASSERT_MSG (!IsCreated (), "Already created");
-	GAME_COMC (_device.CreatePixelShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, &m_pShader));
+	GAME_ASSERT_MSG (pBytecode, "Bytecode is nullptr");
+	switch (m_Type)
+	{
+		case Type::VertexShader:
+			GAME_COMC (_device.CreateVertexShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11VertexShader**>(&m_pShader)));
+			break;
+		case Type::PixelShader:
+			GAME_COMC (_device.CreatePixelShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11PixelShader**>(&m_pShader)));
+			break;
+		case Type::GeometryShader:
+			GAME_COMC (_device.CreateGeometryShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11GeometryShader**>(&m_pShader)));
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
+	}
 }
 
-void PixelShaderResource::Destroy ()
+void ShaderResource::ForceDestroy ()
 {
 	GAME_ASSERT_MSG (IsCreated (), "Not created");
 	m_pShader->Release ();
 	m_pShader = nullptr;
 }
 
-bool PixelShaderResource::IsCreated () const
+bool ShaderResource::IsCreated () const
 {
 	return m_pShader != nullptr;
 }
 
-GeometryShaderResource::~GeometryShaderResource ()
+ShaderResource::Type ShaderResource::GetType () const
 {
-	if (GeometryShaderResource::IsCreated ())
-	{
-		GeometryShaderResource::Destroy ();
-	}
-}
-
-void GeometryShaderResource::SetShader (ID3D11DeviceContext & _deviceContext) const
-{
-	GAME_ASSERT_MSG (IsCreated (), "Not created");
-	GAME_COMC (_deviceContext.GSSetShader (m_pShader, nullptr, 0));
-}
-
-void GeometryShaderResource::Create (ID3D11Device & _device)
-{
-	GAME_ASSERT_MSG (pBytecode, "Bytecode is nullptr");
-	GAME_ASSERT_MSG (!IsCreated (), "Already created");
-	GAME_COMC (_device.CreateGeometryShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, &m_pShader));
-}
-
-void GeometryShaderResource::Destroy ()
-{
-	GAME_ASSERT_MSG (IsCreated (), "Not created");
-	m_pShader->Release ();
-	m_pShader = nullptr;
-}
-
-bool GeometryShaderResource::IsCreated () const
-{
-	return m_pShader != nullptr;
+	return m_Type;
 }

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace Storage
 {
 
-	char * LoadBinaryFile (const std::string& filename, int& size);
+	std::vector<char> LoadBinaryFile (const std::string& filename);
 
 	std::string LoadTextFile (const std::string& filename);
 
