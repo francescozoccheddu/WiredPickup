@@ -2,34 +2,25 @@
 
 #include <Game/Resources/Resource.hpp>
 #include <Game/Utils/Exceptions.hpp>
+#include <Game/Resources/ShaderResource.hpp>
 #include <vector>
 
-class ConstantBufferResource : public Resource
+class ConstantBufferResource : public SingleResource
 {
 
 public:
 
-	static void SetForVertexShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
-
-	static void SetForPixelShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
-
-	static void SetForGeometryShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
+	static void SetForShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers, ShaderResource::Type shaderType);
 
 	ConstantBufferResource (int size);
 
-	~ConstantBufferResource ();
-
 	void Update (ID3D11DeviceContext & deviceContext, const void * pData, int cData) const;
 
-	void SetForVertexShader (ID3D11DeviceContext & deviceContext, int slot) const;
+	void SetForShader (ID3D11DeviceContext & deviceContext, int slot, ShaderResource::Type shaderType) const;
 
-	void SetForPixelShader (ID3D11DeviceContext & deviceContext, int slot) const;
+	void ForceCreate (ID3D11Device & device) override final;
 
-	void SetForGeometryShader (ID3D11DeviceContext & deviceContext, int slot) const;
-
-	void Create (ID3D11Device & device) override final;
-
-	void Destroy () override final;
+	void ForceDestroy () override final;
 
 	bool IsCreated () const override final;
 
@@ -52,8 +43,6 @@ private:
 
 	ID3D11Buffer * m_pBuffer { nullptr };
 	const UINT m_cBuffer;
-
-	static ID3D11Buffer ** GatherBuffers (const std::vector<const ConstantBufferResource*>& buffers);
 
 };
 

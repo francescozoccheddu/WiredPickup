@@ -14,14 +14,17 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\BufferResources.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ConstantBufferResource.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DeviceHolder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Dispatcher.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Exceptions.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Gamepad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\InputLayoutResource.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Mesh.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\MeshResource.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Renderer.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Resource.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ResourceGroup.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Storage.cpp" />
   </ItemGroup>
@@ -34,9 +37,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Input\Gamepad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Mesh.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Renderer.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\BufferResources.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ConstantBufferResource.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\MeshResource.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\InputLayoutResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\Resource.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ResourceGroup.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\COMExceptions.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Exceptions.hpp" />
@@ -54,5 +59,11 @@
     <FxCompile Include="$(MSBuildThisFileDirectory)Shaders\default_vertex.hlsl">
       <ShaderType>Vertex</ShaderType>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\c4d_mesh_exporter.py" />
+    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\Test.c4d">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
 </Project>

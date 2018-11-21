@@ -5,17 +5,13 @@
 #include <fstream>
 #include <sstream>
 
-char * Storage::LoadBinaryFile (const std::string& _filename, int& _size)
+std::vector<char> Storage::LoadBinaryFile (const std::string& _filename)
 {
-	std::ifstream file { _filename, std::ios::ate | std::ios::binary | std::ios::in };
+	std::ifstream file { _filename, std::ios::binary | std::ios::in };
 	GAME_ASSERT_MSG (file.is_open (), "File not opened");
-	std::streampos size { file.tellg () };
-	file.seekg (std::ios::beg);
-	char * pBuf { new char[static_cast<unsigned int>(size)] };
-	file.read (pBuf, size);
+	std::vector<char> vec { std::istreambuf_iterator<char> (file), std::istreambuf_iterator<char> () };
 	file.close ();
-	_size = static_cast<int>(size);
-	return pBuf;
+	return vec;
 }
 
 std::string Storage::LoadTextFile (const std::string& _filename)
