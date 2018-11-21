@@ -22,7 +22,6 @@ void Dispatcher::Initialize ()
 
 double Dispatcher::s_TimerFreq = 0.0;
 
-
 Dispatcher::Dispatcher ()
 {
 	m_DeviceHolder.Listeners.push_back (&m_Renderer);

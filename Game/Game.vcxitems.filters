@@ -57,13 +57,16 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ResourceGroup.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\ShaderResource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Resource.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\RasterizerStateResource.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DepthBufferResource.cpp">
+      <Filter>Sources\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp">
+      <Filter>Sources\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\StateResources.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,13 +128,16 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\BufferResources.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Resources\ShaderResource.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResource.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\RasterizerStateResource.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ResourceGroup.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Resources\ResourceGroup.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\DepthBufferResource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Resources\StateResources.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
   </ItemGroup>
