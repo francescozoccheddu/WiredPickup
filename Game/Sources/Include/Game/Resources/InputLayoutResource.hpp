@@ -33,7 +33,7 @@ struct InputLayout : public InputLayoutProvider
 
 };
 
-class InputLayoutResource : public SingleResource
+class InputLayoutResource : public AtomicResource
 {
 
 public:

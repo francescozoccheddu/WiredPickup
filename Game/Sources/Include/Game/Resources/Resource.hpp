@@ -18,7 +18,7 @@ public:
 
 };
 
-class SingleResource : public Resource
+class AtomicResource : public Resource
 {
 
 	virtual bool IsCreated () const = 0;
