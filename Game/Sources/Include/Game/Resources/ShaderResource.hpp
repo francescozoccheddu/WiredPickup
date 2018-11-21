@@ -37,7 +37,7 @@ struct ShaderBytecode : public ShaderBytecodeProvider
 
 };
 
-class ShaderResource : public SingleResource
+class ShaderResource : public AtomicResource
 {
 
 public:

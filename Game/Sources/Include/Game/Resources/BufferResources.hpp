@@ -34,7 +34,7 @@ struct Buffer : public BufferProvider<T>
 
 };
 
-class BufferResource : public SingleResource
+class BufferResource : public AtomicResource
 {
 
 public:

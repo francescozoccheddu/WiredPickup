@@ -3,7 +3,6 @@
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 #include <Game/Utils/Storage.hpp>
-#include "Include\Game\Resources\ShaderResource.hpp"
 
 ShaderBytecode::ShaderBytecode (const std::vector<char>& _bytecode)
 	: bytecode { _bytecode }

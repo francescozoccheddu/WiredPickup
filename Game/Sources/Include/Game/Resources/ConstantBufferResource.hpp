@@ -5,7 +5,7 @@
 #include <Game/Resources/ShaderResource.hpp>
 #include <vector>
 
-class ConstantBufferResource : public SingleResource
+class ConstantBufferResource : public AtomicResource
 {
 
 public:

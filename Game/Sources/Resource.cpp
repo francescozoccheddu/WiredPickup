@@ -1,6 +1,6 @@
 #include <Game/Resources/Resource.hpp>
 
-void SingleResource::EnsureCreate (ID3D11Device & _device)
+void AtomicResource::EnsureCreate (ID3D11Device & _device)
 {
 	if (!IsCreated ())
 	{
@@ -8,7 +8,7 @@ void SingleResource::EnsureCreate (ID3D11Device & _device)
 	}
 }
 
-void SingleResource::EnsureDestroy ()
+void AtomicResource::EnsureDestroy ()
 {
 	if (IsCreated ())
 	{
