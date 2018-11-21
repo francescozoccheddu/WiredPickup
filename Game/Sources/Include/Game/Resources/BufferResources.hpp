@@ -113,17 +113,34 @@ protected:
 
 };
 
-template<bool bHalfPrecision>
 class IndexBufferResource : public BufferResource
 {
 
-public:
+	static void Reset (ID3D11DeviceContext& _deviceContext);
 
-	void Set (ID3D11DeviceContext& _deviceContext) const
+	void Set (ID3D11DeviceContext& _deviceContext) const;
+
+protected:
+
+	enum class Format
 	{
-		GAME_ASSERT_MSG (IsCreated (), "Not created");
-		GAME_COMC (_deviceContext.IASetIndexBuffer (GetBuffer (), bHalfPrecision ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT, 0));
+		R16UINT, R32UINT
+	};
+
+	virtual Format GetFormat () const = 0;
+
+	virtual inline Type GetType () const override final
+	{
+		return Type::IndexBuffer;
 	}
+
+};
+
+template<bool bHalfPrecision>
+class TIndexBufferResource : public IndexBufferResource
+{
+
+public:
 
 	using ind_t = std::conditional<bHalfPrecision, uint16_t, uint32_t>;
 
@@ -131,24 +148,24 @@ public:
 
 protected:
 
-	virtual size_t GetStride () const override
+	virtual Format GetFormat () const override final
+	{
+		return bHalfPrecision ? Format::R16UINT : Format::R32UINT;
+	}
+
+	virtual size_t GetStride () const override final
 	{
 		return sizeof (ind_t);
 	}
 
-	virtual const void * GetData () const override
+	virtual const void * GetData () const override final
 	{
 		return pProvider->GetData ();
 	}
 
-	virtual int GetLength () const override
+	virtual int GetLength () const override final
 	{
 		return pProvider->GetLength ();
-	}
-
-	virtual Type GetType () const override
-	{
-		return Type::IndexBuffer;
 	}
 
 };

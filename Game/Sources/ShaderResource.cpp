@@ -3,6 +3,7 @@
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 #include <Game/Utils/Storage.hpp>
+#include "Include\Game\Resources\ShaderResource.hpp"
 
 ShaderBytecode::ShaderBytecode (const std::vector<char>& _bytecode)
 	: bytecode { _bytecode }
@@ -21,6 +22,25 @@ ShaderResource::ShaderResource (Type _type)
 		case Type::VertexShader:
 		case Type::PixelShader:
 		case Type::GeometryShader:
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
+	}
+}
+
+void ShaderResource::ResetShader (ID3D11DeviceContext & _deviceContext, Type _type)
+{
+	switch (_type)
+	{
+		case Type::VertexShader:
+			GAME_COMC (_deviceContext.VSSetShader (nullptr, nullptr, 0));
+			break;
+		case Type::PixelShader:
+			GAME_COMC (_deviceContext.PSSetShader (nullptr, nullptr, 0));
+			break;
+		case Type::GeometryShader:
+			GAME_COMC (_deviceContext.GSSetShader (nullptr, nullptr, 0));
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
