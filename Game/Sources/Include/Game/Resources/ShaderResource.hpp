@@ -1,25 +1,48 @@
 #pragma once
 
 #include <Game/Resources/Resource.hpp>
+#include <string>
 
-#define GAME_SHADER_RESOURCES_DIR GAME_RESOURCES_DIR "Shaders/"
-#define GAME_SHADER_RESOURCES_EXT ".cso"
-#define GAME_SHADER_RESOURCES_FILENAME(_name) (GAME_SHADER_RESOURCES_DIR _name GAME_SHADER_RESOURCES_EXT)
-#define GAME_PIXELSHADER_FILENAME_SUFFIX "_pixel"
-#define GAME_VERTEXSHADER_FILENAME_SUFFIX "_vertex"
-#define GAME_GEOMETRYSHADER_FILENAME_SUFFIX "_geometry"
-#define GAME_PIXELSHADER_FILENAME(_passName) GAME_SHADER_RESOURCES_FILENAME(_passName GAME_PIXELSHADER_FILENAME_SUFFIX)
-#define GAME_VERTEXSHADER_FILENAME(_passName) GAME_SHADER_RESOURCES_FILENAME(_passName GAME_VERTEXSHADER_FILENAME_SUFFIX)
-#define GAME_GEOMETRYSHADER_FILENAME(_passName) GAME_SHADER_RESOURCES_FILENAME(_passName GAME_GEOMETRYSHADER_FILENAME_SUFFIX)
-
-class VertexShaderResource final : public BinaryFileResource
+class ShaderBytecodeProvider
 {
 
 public:
 
-	VertexShaderResource (const std::string & fileName, const D3D11_INPUT_ELEMENT_DESC * pDescriptions, int cDescriptions);
+	virtual ~ShaderBytecodeProvider () = default;
 
-	~VertexShaderResource ();
+	virtual const void * GetData () const = 0;
+
+	virtual size_t GetSize () const = 0;
+
+};
+
+class ShaderBytecode final : public ShaderBytecodeProvider
+{
+
+public:
+
+	ShaderBytecode () = default;
+
+	ShaderBytecode (const std::vector<char>& bytecode);
+
+	virtual const void * GetData () const override;
+
+	virtual size_t GetSize () const override;
+
+	std::vector<char> bytecode;
+
+	static const ShaderBytecode CreateFromFile (const std::string& filename);
+
+};
+
+class VertexShaderResource final : public Resource
+{
+
+public:
+
+	~VertexShaderResource () override;
+
+	VertexShaderResource (const D3D11_INPUT_ELEMENT_DESC * pDescriptions, int cDescriptions);
 
 	void SetShaderAndInputLayout (ID3D11DeviceContext & deviceContext) const;
 
@@ -28,6 +51,8 @@ public:
 	void Destroy () override final;
 
 	bool IsCreated () const override final;
+
+	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 
@@ -38,14 +63,12 @@ private:
 
 };
 
-class PixelShaderResource final : public BinaryFileResource
+class PixelShaderResource final : public Resource
 {
 
 public:
 
-	using BinaryFileResource::BinaryFileResource;
-
-	~PixelShaderResource ();
+	~PixelShaderResource () override;
 
 	void SetShader (ID3D11DeviceContext & deviceContext) const;
 
@@ -54,6 +77,8 @@ public:
 	void Destroy () override final;
 
 	bool IsCreated () const override final;
+
+	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 
@@ -61,14 +86,12 @@ private:
 
 };
 
-class GeometryShaderResource final : public BinaryFileResource
+class GeometryShaderResource final : public Resource
 {
 
 public:
 
-	using BinaryFileResource::BinaryFileResource;
-
-	~GeometryShaderResource ();
+	~GeometryShaderResource () override;
 
 	void SetShader (ID3D11DeviceContext & deviceContext) const;
 
@@ -77,6 +100,8 @@ public:
 	void Destroy () override final;
 
 	bool IsCreated () const override final;
+
+	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 

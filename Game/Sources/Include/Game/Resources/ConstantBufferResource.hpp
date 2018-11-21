@@ -9,9 +9,11 @@ class ConstantBufferResource : public Resource
 
 public:
 
-	static void SetForVertexShader (ID3D11DeviceContext & deviceContext, int startingSlot, std::vector<ConstantBufferResource*> buffers);
+	static void SetForVertexShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
 
-	static void SetForPixelShader (ID3D11DeviceContext & deviceContext, int startingSlot, std::vector<ConstantBufferResource*> buffers);
+	static void SetForPixelShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
+
+	static void SetForGeometryShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers);
 
 	ConstantBufferResource (int size);
 
@@ -50,6 +52,8 @@ private:
 
 	ID3D11Buffer * m_pBuffer { nullptr };
 	const UINT m_cBuffer;
+
+	static ID3D11Buffer ** GatherBuffers (const std::vector<const ConstantBufferResource*>& buffers);
 
 };
 
