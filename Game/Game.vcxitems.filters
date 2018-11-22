@@ -66,7 +66,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\StateResources.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\StateResources.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,7 +137,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\DepthBufferResource.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Resources\StateResources.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
   </ItemGroup>
