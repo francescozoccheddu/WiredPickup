@@ -2,6 +2,7 @@
 
 #include <Game/Resources/Resource.hpp>
 
+#include <Game/Resources/ShaderResource.hpp>
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 
@@ -28,15 +29,13 @@ public:
 		return m_pState;
 	}
 
-	void Set (ID3D11DeviceContext& _deviceContext) const
-	{
-		GAME_ASSERT_MSG (IsCreated (), "Not created");
-		ForceSet (_deviceContext);
-	}
-
 protected:
 
-	virtual void ForceSet (ID3D11DeviceContext& deviceContext, T * pState) const = 0;
+	T * GetState () const
+	{
+		GAME_ASSERT_MSG (IsCreated (), "Not created");
+		return m_pState;
+	}
 
 	virtual T * Create (ID3D11Device& device) const = 0;
 
@@ -55,9 +54,9 @@ public:
 
 	D3D11_RASTERIZER_DESC description;
 
-protected:
+	void Set (ID3D11DeviceContext& deviceContext) const;
 
-	virtual void ForceSet (ID3D11DeviceContext& deviceContext, ID3D11RasterizerState * pState) const override final;
+protected:
 
 	virtual ID3D11RasterizerState * Create (ID3D11Device & device) const override final;
 
@@ -72,9 +71,9 @@ public:
 
 	D3D11_DEPTH_STENCIL_DESC description;
 
-protected:
+	void Set (ID3D11DeviceContext& deviceContext) const;
 
-	virtual void ForceSet (ID3D11DeviceContext& deviceContext, ID3D11DepthStencilState * pState) const override final;
+protected:
 
 	virtual ID3D11DepthStencilState * Create (ID3D11Device & device) const override final;
 
@@ -91,10 +90,27 @@ public:
 	FLOAT factor[4];
 	UINT sampleMask;
 
+	void Set (ID3D11DeviceContext& deviceContext) const;
+
 protected:
 
-	virtual void ForceSet (ID3D11DeviceContext& deviceContext, ID3D11BlendState * pState) const override final;
-
 	virtual ID3D11BlendState * Create (ID3D11Device & device) const override final;
+
+};
+
+class SamplerStateResource : public StateResource<ID3D11SamplerState>
+{
+
+public:
+
+	static void Set (ID3D11DeviceContext& deviceContext, int startingSlot, ShaderResource::Type shaderType, const std::vector<const SamplerStateResource*> samplers);
+
+	void Set (ID3D11DeviceContext& deviceContext, int slot, ShaderResource::Type shaderType) const;
+
+	D3D11_SAMPLER_DESC description;
+
+protected:
+
+	virtual ID3D11SamplerState * Create (ID3D11Device & device) const override final;
 
 };
