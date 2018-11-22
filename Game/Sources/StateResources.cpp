@@ -2,7 +2,6 @@
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
-#include "Include\Game\Resources\StateResources.hpp"
 
 void RasterizerStateResource::Reset (ID3D11DeviceContext & _deviceContext)
 {
@@ -55,7 +54,7 @@ ID3D11BlendState * BlendStateResource::Create (ID3D11Device & _device) const
 	return pState;
 }
 
-void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, ShaderResource::Type _shaderType, const std::vector<const SamplerStateResource*> _samplers)
+void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, ShaderType _shaderType, const std::vector<const SamplerStateResource*> _samplers)
 {
 	if (!_samplers.empty ())
 	{
@@ -74,14 +73,23 @@ void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _start
 		}
 		switch (_shaderType)
 		{
-			case ShaderResource::Type::VertexShader:
+			case ShaderType::VertexShader:
 				_deviceContext.VSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
 				break;
-			case ShaderResource::Type::PixelShader:
+			case ShaderType::PixelShader:
 				_deviceContext.PSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
 				break;
-			case ShaderResource::Type::GeometryShader:
+			case ShaderType::GeometryShader:
 				_deviceContext.GSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
+				break;
+			case ShaderType::HullShader:
+				_deviceContext.HSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
+				break;
+			case ShaderType::DomainShader:
+				_deviceContext.DSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
+				break;
+			case ShaderType::ComputeShader:
+				_deviceContext.CSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
 				break;
 			default:
 				GAME_THROW_MSG ("Unknown type");
@@ -90,19 +98,28 @@ void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _start
 	}
 }
 
-void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderResource::Type _shaderType) const
+void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
 {
 	ID3D11SamplerState * pSamplers[] { GetState () };
 	switch (_shaderType)
 	{
-		case ShaderResource::Type::VertexShader:
+		case ShaderType::VertexShader:
 			GAME_COMC (_deviceContext.VSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
 			break;
-		case ShaderResource::Type::PixelShader:
+		case ShaderType::PixelShader:
 			GAME_COMC (_deviceContext.PSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
 			break;
-		case ShaderResource::Type::GeometryShader:
+		case ShaderType::GeometryShader:
 			GAME_COMC (_deviceContext.GSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
+			break;
+		case ShaderType::HullShader:
+			GAME_COMC (_deviceContext.HSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
+			break;
+		case ShaderType::DomainShader:
+			GAME_COMC (_deviceContext.DSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
+			break;
+		case ShaderType::ComputeShader:
+			GAME_COMC (_deviceContext.CSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");

@@ -2,7 +2,7 @@
 
 #include <Game/Resources/Resource.hpp>
 #include <Game/Utils/Exceptions.hpp>
-#include <Game/Resources/ShaderResource.hpp>
+#include <Game/Resources/ShaderType.hpp>
 #include <vector>
 
 class ConstantBufferResource : public AtomicResource
@@ -10,13 +10,13 @@ class ConstantBufferResource : public AtomicResource
 
 public:
 
-	static void SetForShader (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers, ShaderResource::Type shaderType);
+	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResource*>& buffers, ShaderType shaderType);
 
 	ConstantBufferResource (int size);
 
 	void Update (ID3D11DeviceContext & deviceContext, const void * pData, int cData) const;
 
-	void SetForShader (ID3D11DeviceContext & deviceContext, int slot, ShaderResource::Type shaderType) const;
+	void Set (ID3D11DeviceContext & deviceContext, int slot, ShaderType shaderType) const;
 
 	void ForceCreate (ID3D11Device & device) override final;
 

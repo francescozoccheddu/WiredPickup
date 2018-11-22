@@ -41,6 +41,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ConstantBufferResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\DepthBufferResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\InputLayoutResource.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderType.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\Resource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ResourceGroup.hpp" />
