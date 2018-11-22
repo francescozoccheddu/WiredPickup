@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Game/Resources/Resource.hpp>
+#include <Game/Resources/ShaderType.hpp>
 #include <string>
 
 struct ShaderBytecodeProvider
@@ -42,16 +43,11 @@ class ShaderResource : public AtomicResource
 
 public:
 
-	enum class Type
-	{
-		VertexShader, PixelShader, GeometryShader
-	};
+	ShaderResource (ShaderType type);
 
-	ShaderResource (Type type);
+	static void Reset (ID3D11DeviceContext & deviceContext, ShaderType type);
 
-	static void ResetShader (ID3D11DeviceContext & deviceContext, Type type);
-
-	void SetShader (ID3D11DeviceContext & deviceContext) const;
+	void Set (ID3D11DeviceContext & deviceContext) const;
 
 	void ForceCreate (ID3D11Device & device) override final;
 
@@ -59,13 +55,13 @@ public:
 
 	bool IsCreated () const override final;
 
-	Type GetType () const;
+	ShaderType GetType () const;
 
 	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 
 	ID3D11DeviceChild * m_pShader { nullptr };
-	const Type m_Type;
+	const ShaderType m_Type;
 
 };

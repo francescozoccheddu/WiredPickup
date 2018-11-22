@@ -13,14 +13,17 @@ const ShaderBytecode ShaderBytecode::CreateFromFile (const std::string & _filena
 	return ShaderBytecode { Storage::LoadBinaryFile (_filename) };
 }
 
-ShaderResource::ShaderResource (Type _type)
+ShaderResource::ShaderResource (ShaderType _type)
 	: m_Type { _type }
 {
 	switch (_type)
 	{
-		case Type::VertexShader:
-		case Type::PixelShader:
-		case Type::GeometryShader:
+		case ShaderType::VertexShader:
+		case ShaderType::PixelShader:
+		case ShaderType::GeometryShader:
+		case ShaderType::HullShader:
+		case ShaderType::DomainShader:
+		case ShaderType::ComputeShader:
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
@@ -28,18 +31,27 @@ ShaderResource::ShaderResource (Type _type)
 	}
 }
 
-void ShaderResource::ResetShader (ID3D11DeviceContext & _deviceContext, Type _type)
+void ShaderResource::Reset (ID3D11DeviceContext & _deviceContext, ShaderType _type)
 {
 	switch (_type)
 	{
-		case Type::VertexShader:
+		case ShaderType::VertexShader:
 			GAME_COMC (_deviceContext.VSSetShader (nullptr, nullptr, 0));
 			break;
-		case Type::PixelShader:
+		case ShaderType::PixelShader:
 			GAME_COMC (_deviceContext.PSSetShader (nullptr, nullptr, 0));
 			break;
-		case Type::GeometryShader:
+		case ShaderType::GeometryShader:
 			GAME_COMC (_deviceContext.GSSetShader (nullptr, nullptr, 0));
+			break;
+		case ShaderType::HullShader:
+			GAME_COMC (_deviceContext.HSSetShader (nullptr, nullptr, 0));
+			break;
+		case ShaderType::DomainShader:
+			GAME_COMC (_deviceContext.DSSetShader (nullptr, nullptr, 0));
+			break;
+		case ShaderType::ComputeShader:
+			GAME_COMC (_deviceContext.CSSetShader (nullptr, nullptr, 0));
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
@@ -47,19 +59,28 @@ void ShaderResource::ResetShader (ID3D11DeviceContext & _deviceContext, Type _ty
 	}
 }
 
-void ShaderResource::SetShader (ID3D11DeviceContext & _deviceContext) const
+void ShaderResource::Set (ID3D11DeviceContext & _deviceContext) const
 {
 	GAME_ASSERT_MSG (IsCreated (), "Not created");
 	switch (m_Type)
 	{
-		case Type::VertexShader:
+		case ShaderType::VertexShader:
 			GAME_COMC (_deviceContext.VSSetShader (reinterpret_cast<ID3D11VertexShader*>(m_pShader), nullptr, 0));
 			break;
-		case Type::PixelShader:
+		case ShaderType::PixelShader:
 			GAME_COMC (_deviceContext.PSSetShader (reinterpret_cast<ID3D11PixelShader*>(m_pShader), nullptr, 0));
 			break;
-		case Type::GeometryShader:
+		case ShaderType::GeometryShader:
 			GAME_COMC (_deviceContext.GSSetShader (reinterpret_cast<ID3D11GeometryShader*>(m_pShader), nullptr, 0));
+			break;
+		case ShaderType::HullShader:
+			GAME_COMC (_deviceContext.HSSetShader (reinterpret_cast<ID3D11HullShader*>(m_pShader), nullptr, 0));
+			break;
+		case ShaderType::DomainShader:
+			GAME_COMC (_deviceContext.DSSetShader (reinterpret_cast<ID3D11DomainShader*>(m_pShader), nullptr, 0));
+			break;
+		case ShaderType::ComputeShader:
+			GAME_COMC (_deviceContext.CSSetShader (reinterpret_cast<ID3D11ComputeShader*>(m_pShader), nullptr, 0));
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
@@ -73,14 +94,23 @@ void ShaderResource::ForceCreate (ID3D11Device & _device)
 	GAME_ASSERT_MSG (pBytecode, "Bytecode is nullptr");
 	switch (m_Type)
 	{
-		case Type::VertexShader:
+		case ShaderType::VertexShader:
 			GAME_COMC (_device.CreateVertexShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11VertexShader**>(&m_pShader)));
 			break;
-		case Type::PixelShader:
+		case ShaderType::PixelShader:
 			GAME_COMC (_device.CreatePixelShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11PixelShader**>(&m_pShader)));
 			break;
-		case Type::GeometryShader:
+		case ShaderType::GeometryShader:
 			GAME_COMC (_device.CreateGeometryShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11GeometryShader**>(&m_pShader)));
+			break;
+		case ShaderType::HullShader:
+			GAME_COMC (_device.CreateHullShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11HullShader**>(&m_pShader)));
+			break;
+		case ShaderType::DomainShader:
+			GAME_COMC (_device.CreateDomainShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11DomainShader**>(&m_pShader)));
+			break;
+		case ShaderType::ComputeShader:
+			GAME_COMC (_device.CreateComputeShader (pBytecode->GetData (), static_cast<SIZE_T>(pBytecode->GetSize ()), nullptr, reinterpret_cast<ID3D11ComputeShader**>(&m_pShader)));
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
@@ -100,7 +130,7 @@ bool ShaderResource::IsCreated () const
 	return m_pShader != nullptr;
 }
 
-ShaderResource::Type ShaderResource::GetType () const
+ShaderType ShaderResource::GetType () const
 {
 	return m_Type;
 }

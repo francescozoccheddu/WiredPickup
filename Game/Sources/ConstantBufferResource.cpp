@@ -4,7 +4,7 @@
 #include <Game/Utils/COMExceptions.hpp>
 #include <vector>
 
-void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers, ShaderResource::Type _shaderType)
+void ConstantBufferResource::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResource*>& _buffers, ShaderType _shaderType)
 {
 	if (!_buffers.empty ())
 	{
@@ -23,14 +23,23 @@ void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext,
 		}
 		switch (_shaderType)
 		{
-			case ShaderResource::Type::VertexShader:
+			case ShaderType::VertexShader:
 				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
-			case ShaderResource::Type::PixelShader:
+			case ShaderType::PixelShader:
 				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
-			case ShaderResource::Type::GeometryShader:
+			case ShaderType::GeometryShader:
 				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::HullShader:
+				_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::DomainShader:
+				_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::ComputeShader:
+				_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
 				break;
 			default:
 				GAME_THROW_MSG ("Unknown type");
@@ -53,18 +62,27 @@ void ConstantBufferResource::Update (ID3D11DeviceContext & _deviceContext, const
 	_deviceContext.Unmap (m_pBuffer, 0);
 }
 
-void ConstantBufferResource::SetForShader (ID3D11DeviceContext & _deviceContext, int _slot, ShaderResource::Type _shaderType) const
+void ConstantBufferResource::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
 {
 	switch (_shaderType)
 	{
-		case ShaderResource::Type::VertexShader:
+		case ShaderType::VertexShader:
 			_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
 			break;
-		case ShaderResource::Type::PixelShader:
+		case ShaderType::PixelShader:
 			_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
 			break;
-		case ShaderResource::Type::GeometryShader:
+		case ShaderType::GeometryShader:
 			_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		case ShaderType::HullShader:
+			_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		case ShaderType::DomainShader:
+			_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
+			break;
+		case ShaderType::ComputeShader:
+			_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_slot), 1, &m_pBuffer);
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");

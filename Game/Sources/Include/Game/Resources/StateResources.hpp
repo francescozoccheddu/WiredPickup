@@ -2,7 +2,7 @@
 
 #include <Game/Resources/Resource.hpp>
 
-#include <Game/Resources/ShaderResource.hpp>
+#include <Game/Resources/ShaderType.hpp>
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 
@@ -103,9 +103,9 @@ class SamplerStateResource : public StateResource<ID3D11SamplerState>
 
 public:
 
-	static void Set (ID3D11DeviceContext& deviceContext, int startingSlot, ShaderResource::Type shaderType, const std::vector<const SamplerStateResource*> samplers);
+	static void Set (ID3D11DeviceContext& deviceContext, int startingSlot, ShaderType shaderType, const std::vector<const SamplerStateResource*> samplers);
 
-	void Set (ID3D11DeviceContext& deviceContext, int slot, ShaderResource::Type shaderType) const;
+	void Set (ID3D11DeviceContext& deviceContext, int slot, ShaderType shaderType) const;
 
 	D3D11_SAMPLER_DESC description;
 

@@ -140,6 +140,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderType.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="$(MSBuildThisFileDirectory)Shaders\default_pixel.hlsl">
