@@ -45,9 +45,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Storage.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ConstantBufferResource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\BufferResources.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
@@ -58,9 +55,6 @@
       <Filter>Sources\Resources</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Resource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DepthBufferResource.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp">
@@ -119,9 +113,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\NonCopyable.hpp">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ConstantBufferResource.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\InputLayoutResource.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
@@ -132,9 +123,6 @@
       <Filter>Sources\Resources</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ResourceGroup.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\DepthBufferResource.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp">

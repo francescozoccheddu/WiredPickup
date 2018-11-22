@@ -33,7 +33,7 @@ struct InputLayout : public InputLayoutProvider
 
 };
 
-class InputLayoutResource : public AtomicResource
+class InputLayoutResource : public SimpleResource<ID3D11InputLayout>
 {
 
 public:
@@ -42,17 +42,11 @@ public:
 
 	void Set (ID3D11DeviceContext & deviceContext) const;
 
-	void ForceCreate (ID3D11Device & device) override final;
-
-	void ForceDestroy () override final;
-
-	bool IsCreated () const override final;
-
 	const InputLayoutProvider * pLayout { nullptr };
 	const ShaderBytecodeProvider * pBytecode { nullptr };
 
-private:
+protected:
 
-	ID3D11InputLayout * m_pInputLayout { nullptr };
+	ID3D11InputLayout * Create (ID3D11Device & device) const override final;
 
 };
