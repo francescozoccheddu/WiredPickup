@@ -15,8 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\BufferResources.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ConstantBufferResource.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DepthBufferResource.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\DeviceHolder.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Dispatcher.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Exceptions.cpp" />
@@ -38,8 +36,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Input\Gamepad.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Renderer.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\BufferResources.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ConstantBufferResource.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\DepthBufferResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\InputLayoutResource.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderType.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp" />

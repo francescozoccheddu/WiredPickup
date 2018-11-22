@@ -6,46 +6,7 @@
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 
-template<typename T>
-class StateResource : public AtomicResource
-{
-public:
-
-	virtual void ForceCreate (ID3D11Device & _device) override
-	{
-		GAME_ASSERT_MSG (!IsCreated (), "Already created");
-		m_pState = Create (_device);
-	}
-
-	virtual void ForceDestroy () override
-	{
-		GAME_ASSERT_MSG (IsCreated (), "Not created");
-		m_pState->Release ();
-		m_pState = nullptr;
-	}
-
-	virtual bool IsCreated () const override
-	{
-		return m_pState;
-	}
-
-protected:
-
-	T * GetState () const
-	{
-		GAME_ASSERT_MSG (IsCreated (), "Not created");
-		return m_pState;
-	}
-
-	virtual T * Create (ID3D11Device& device) const = 0;
-
-private:
-
-	T * m_pState;
-
-};
-
-class RasterizerStateResource : public StateResource<ID3D11RasterizerState>
+class RasterizerStateResource : public SimpleResource<ID3D11RasterizerState>
 {
 
 public:
@@ -56,13 +17,13 @@ public:
 
 	void Set (ID3D11DeviceContext& deviceContext) const;
 
-protected:
+private:
 
 	virtual ID3D11RasterizerState * Create (ID3D11Device & device) const override final;
 
 };
 
-class DepthStencilStateResource : public StateResource<ID3D11DepthStencilState>
+class DepthStencilStateResource : public SimpleResource<ID3D11DepthStencilState>
 {
 
 public:
@@ -73,13 +34,13 @@ public:
 
 	void Set (ID3D11DeviceContext& deviceContext) const;
 
-protected:
+private:
 
 	virtual ID3D11DepthStencilState * Create (ID3D11Device & device) const override final;
 
 };
 
-class BlendStateResource : public StateResource<ID3D11BlendState>
+class BlendStateResource : public SimpleResource<ID3D11BlendState>
 {
 
 public:
@@ -92,13 +53,13 @@ public:
 
 	void Set (ID3D11DeviceContext& deviceContext) const;
 
-protected:
+private:
 
 	virtual ID3D11BlendState * Create (ID3D11Device & device) const override final;
 
 };
 
-class SamplerStateResource : public StateResource<ID3D11SamplerState>
+class SamplerStateResource : public SimpleResource<ID3D11SamplerState>
 {
 
 public:
@@ -109,7 +70,7 @@ public:
 
 	D3D11_SAMPLER_DESC description;
 
-protected:
+private:
 
 	virtual ID3D11SamplerState * Create (ID3D11Device & device) const override final;
 

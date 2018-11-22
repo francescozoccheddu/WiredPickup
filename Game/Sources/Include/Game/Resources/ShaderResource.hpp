@@ -38,7 +38,7 @@ struct ShaderBytecode : public ShaderBytecodeProvider
 
 };
 
-class ShaderResource : public AtomicResource
+class ShaderResource : public SimpleResource<ID3D11DeviceChild>
 {
 
 public:
@@ -49,19 +49,14 @@ public:
 
 	void Set (ID3D11DeviceContext & deviceContext) const;
 
-	void ForceCreate (ID3D11Device & device) override final;
-
-	void ForceDestroy () override final;
-
-	bool IsCreated () const override final;
-
 	ShaderType GetType () const;
 
 	const ShaderBytecodeProvider * pBytecode { nullptr };
 
 private:
 
-	ID3D11DeviceChild * m_pShader { nullptr };
+	ID3D11DeviceChild * Create (ID3D11Device & device) const override final;
+
 	const ShaderType m_Type;
 
 };

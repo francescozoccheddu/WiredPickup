@@ -10,7 +10,7 @@ void RasterizerStateResource::Reset (ID3D11DeviceContext & _deviceContext)
 
 void RasterizerStateResource::Set (ID3D11DeviceContext & _deviceContext) const
 {
-	_deviceContext.RSSetState (GetState ());
+	_deviceContext.RSSetState (GetPointer ());
 }
 
 ID3D11RasterizerState * RasterizerStateResource::Create (ID3D11Device & _device) const
@@ -27,7 +27,7 @@ void DepthStencilStateResource::Reset (ID3D11DeviceContext & _deviceContext)
 
 void DepthStencilStateResource::Set (ID3D11DeviceContext & _deviceContext) const
 {
-	_deviceContext.OMSetDepthStencilState (GetState (), 0);
+	_deviceContext.OMSetDepthStencilState (GetPointer (), 0);
 }
 
 ID3D11DepthStencilState * DepthStencilStateResource::Create (ID3D11Device & _device) const
@@ -44,7 +44,7 @@ void BlendStateResource::Reset (ID3D11DeviceContext & _deviceContext, const FLOA
 
 void BlendStateResource::Set (ID3D11DeviceContext & _deviceContext) const
 {
-	_deviceContext.OMSetBlendState (GetState (), factor, sampleMask);
+	_deviceContext.OMSetBlendState (GetPointer (), factor, sampleMask);
 }
 
 ID3D11BlendState * BlendStateResource::Create (ID3D11Device & _device) const
@@ -64,7 +64,7 @@ void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _start
 			if (_samplers[iBuf])
 			{
 				GAME_ASSERT_MSG (_samplers[iBuf]->IsCreated (), "Not created");
-				samplers[iBuf] = _samplers[iBuf]->GetState ();
+				samplers[iBuf] = _samplers[iBuf]->GetPointer ();
 			}
 			else
 			{
@@ -100,7 +100,7 @@ void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _start
 
 void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
 {
-	ID3D11SamplerState * pSamplers[] { GetState () };
+	ID3D11SamplerState * pSamplers[] { GetPointer () };
 	switch (_shaderType)
 	{
 		case ShaderType::VertexShader:
