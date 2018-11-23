@@ -1,31 +1,30 @@
 #include <Game\Resources\BufferResources.hpp>
-#include "Include\Game\Resources\BufferResources.hpp"
 
 ID3D11Buffer * BufferResource::Create (ID3D11Device & _device) const
 {
 	ID3D11Buffer * pBuffer;
-	GAME_COMC (_device.CreateBuffer (&description, bInitialize ? &data : nullptr, &pBuffer));
+	GAME_COMC (_device.CreateBuffer (&description, bInitialize ? &initialData : nullptr, &pBuffer));
 	return pBuffer;
 }
 
-void IABufferResourceBase::ForceCreate (ID3D11Device & _device)
+void BufferResourceBase::ForceCreate (ID3D11Device & _device)
 {
 	GAME_RESOURCE_ASSERT_NOTCREATED;
 	Prepare (m_Buffer);
 	m_Buffer.ForceCreate (_device);
 }
 
-void IABufferResourceBase::ForceDestroy ()
+void BufferResourceBase::ForceDestroy ()
 {
 	m_Buffer.ForceDestroy ();
 }
 
-bool IABufferResourceBase::IsCreated () const
+bool BufferResourceBase::IsCreated () const
 {
 	return m_Buffer.IsCreated ();
 }
 
-ID3D11Buffer * IABufferResourceBase::GetPointer () const
+ID3D11Buffer * BufferResourceBase::GetPointer () const
 {
 	return m_Buffer.GetPointer ();
 }
