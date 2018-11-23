@@ -17,7 +17,7 @@ public:
 	using SimpleResource::GetPointer;
 
 	D3D11_BUFFER_DESC description;
-	D3D11_SUBRESOURCE_DATA data;
+	D3D11_SUBRESOURCE_DATA initialData;
 	bool bInitialize { false };
 
 private:
@@ -72,7 +72,7 @@ struct SingletonBuffer : public BufferProvider<T>
 
 };
 
-class IABufferResourceBase : public AtomicResource
+class BufferResourceBase : public AtomicResource
 {
 
 public:
@@ -95,7 +95,7 @@ private:
 
 };
 
-class IndexBufferResourceBase : public IABufferResourceBase
+class IndexBufferResourceBase : public BufferResourceBase
 {
 
 public:
@@ -157,14 +157,14 @@ private:
 		_buffer.description.StructureByteStride = static_cast<UINT>(sizeof (ind_t));
 		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
 		// Data
-		_buffer.data.pSysMem = pProvider->GetData ();
-		_buffer.data.SysMemPitch = 0;
-		_buffer.data.SysMemSlicePitch = 0;
+		_buffer.initialData.pSysMem = pProvider->GetData ();
+		_buffer.initialData.SysMemPitch = 0;
+		_buffer.initialData.SysMemSlicePitch = 0;
 	}
 
 };
 
-class VertexBufferResourceBase : public IABufferResourceBase
+class VertexBufferResourceBase : public BufferResourceBase
 {
 
 public:
@@ -207,9 +207,9 @@ private:
 		_buffer.description.StructureByteStride = static_cast<UINT>(sizeof (ind_t));
 		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
 		// Data
-		_buffer.data.pSysMem = pProvider->GetData ();
-		_buffer.data.SysMemPitch = 0;
-		_buffer.data.SysMemSlicePitch = 0;
+		_buffer.initialData.pSysMem = pProvider->GetData ();
+		_buffer.initialData.SysMemPitch = 0;
+		_buffer.initialData.SysMemSlicePitch = 0;
 	}
 
 	virtual size_t GetStride () const override
@@ -219,7 +219,7 @@ private:
 
 };
 
-class ConstantBufferResourceBase : public IABufferResourceBase
+class ConstantBufferResourceBase : public BufferResourceBase
 {
 
 public:
@@ -271,9 +271,9 @@ private:
 		_buffer.description.StructureByteStride = 0;
 		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
 		// Data
-		_buffer.data.pSysMem = pProvider->GetData ();
-		_buffer.data.SysMemPitch = 0;
-		_buffer.data.SysMemSlicePitch = 0;
+		_buffer.initialData.pSysMem = pProvider->GetData ();
+		_buffer.initialData.SysMemPitch = 0;
+		_buffer.initialData.SysMemSlicePitch = 0;
 	}
 
 };
@@ -318,9 +318,9 @@ private:
 		_buffer.description.StructureByteStride = 0;
 		_buffer.description.Usage = D3D11_USAGE_DYNAMIC;
 		// Data
-		_buffer.data.pSysMem = &data;
-		_buffer.data.SysMemPitch = 0;
-		_buffer.data.SysMemSlicePitch = 0;
+		_buffer.initialData.pSysMem = &data;
+		_buffer.initialData.SysMemPitch = 0;
+		_buffer.initialData.SysMemSlicePitch = 0;
 	}
 
 };
