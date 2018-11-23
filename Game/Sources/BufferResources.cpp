@@ -1,4 +1,5 @@
 #include <Game\Resources\BufferResources.hpp>
+#include "Include\Game\Resources\BufferResources.hpp"
 
 ID3D11Buffer * BufferResource::Create (ID3D11Device & _device) const
 {
@@ -74,4 +75,77 @@ void VertexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _s
 	const UINT offsets[] { 0 };
 	ID3D11Buffer * pBuffers[] { GetPointer () };
 	_deviceContext.IASetVertexBuffers (static_cast<UINT>(_slot), 1, pBuffers, strides, offsets);
+}
+
+void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResourceBase*>& _buffers, ShaderType _shaderType)
+{
+	if (!_buffers.empty ())
+	{
+		std::vector<ID3D11Buffer*> bufs { _buffers.size () };
+		for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
+		{
+			if (_buffers[iBuf])
+			{
+				GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
+				bufs[iBuf] = _buffers[iBuf]->GetPointer ();
+			}
+			else
+			{
+				bufs[iBuf] = nullptr;
+			}
+		}
+		switch (_shaderType)
+		{
+			case ShaderType::VertexShader:
+				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::PixelShader:
+				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::GeometryShader:
+				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::HullShader:
+				_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::DomainShader:
+				_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			case ShaderType::ComputeShader:
+				_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
+				break;
+			default:
+				GAME_THROW_MSG ("Unknown type");
+				break;
+		}
+	}
+}
+
+void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
+{
+	ID3D11Buffer * pBuffers[] { GetPointer () };
+	switch (_shaderType)
+	{
+		case ShaderType::VertexShader:
+			_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		case ShaderType::PixelShader:
+			_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		case ShaderType::GeometryShader:
+			_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		case ShaderType::HullShader:
+			_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		case ShaderType::DomainShader:
+			_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		case ShaderType::ComputeShader:
+			_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+			break;
+	}
 }
