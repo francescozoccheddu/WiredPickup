@@ -64,14 +64,16 @@ class SamplerStateResource : public SimpleResource<ID3D11SamplerState>
 
 public:
 
-	static void Set (ID3D11DeviceContext& deviceContext, int startingSlot, ShaderType shaderType, const std::vector<const SamplerStateResource*> samplers);
+	static void Set (ID3D11DeviceContext& deviceContext, UINT startingSlot, ShaderType shaderType, const SamplerStateResource*const* pSamplers, int cSampler);
 
-	void Set (ID3D11DeviceContext& deviceContext, int slot, ShaderType shaderType) const;
+	void Set (ID3D11DeviceContext& deviceContext, UINT slot, ShaderType shaderType) const;
 
 	D3D11_SAMPLER_DESC description;
 
 private:
 
 	virtual ID3D11SamplerState * Create (ID3D11Device & device) const override final;
+
+	static void Set (ID3D11DeviceContext& deviceContext, UINT startingSlot, ShaderType shaderType, ID3D11SamplerState*const* pSamplerStates, int cSamplerStates);
 
 };

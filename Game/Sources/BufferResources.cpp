@@ -1,150 +1,329 @@
 #include <Game\Resources\BufferResources.hpp>
 
-ID3D11Buffer * BufferResource::Create (ID3D11Device & _device) const
+BufferResource::BufferResource (BindMode _bindModes, bool _bImmutable, bool _bReadable, size_t _structSize, int _length)
+	: m_BindModes { _bindModes }, m_bImmutable { _bImmutable }, m_bReadable { _bReadable }, m_StructSize { static_cast<UINT>(_structSize) }, m_Length { _length }
 {
-	ID3D11Buffer * pBuffer;
-	GAME_COMC (_device.CreateBuffer (&description, bInitialize ? &initialData : nullptr, &pBuffer));
-	return pBuffer;
+	GAME_ASSERT_MSG (!_bReadable || _bindModes == BindMode::None, "Readable resources cannot be bound");
+	GAME_ASSERT_MSG (_length > 0, "Lenght must be positive");
+	GAME_ASSERT_MSG (_structSize > 0, "Struct size must be positive");
+	GAME_ASSERT_MSG (!(_bindModes & BindMode::ConstantBuffer) || (_structSize * _length) % 16 == 0, "Constant buffer size must be multiple of 16");
 }
 
-void BufferResourceBase::ForceCreate (ID3D11Device & _device)
+void BufferResource::Update (ID3D11DeviceContext& _deviceContext, const void * _pData, int _cData, int _destOffset)
 {
-	GAME_RESOURCE_ASSERT_NOTCREATED;
-	Prepare (m_Buffer);
-	m_Buffer.ForceCreate (_device);
+	GAME_ASSERT_MSG (!m_bImmutable, "Immutable resource");
+	GAME_ASSERT_MSG (_cData > 0 && _destOffset > 0, "Invalid data size arguments");
+	ID3D11Buffer * pBuffer { GetPointer () };
+	if (m_BindModes & BindMode::StreamOutput)
+	{
+		D3D11_BOX box;
+		box.left = static_cast<UINT>(_destOffset);
+		box.right = static_cast<UINT>(_destOffset + _cData);
+		box.top = 0;
+		box.bottom = 1;
+		box.front = 0;
+		box.back = 1;
+		_deviceContext.UpdateSubresource (pBuffer, 0, &box, _pData, 0, 0);
+	}
+	else
+	{
+		D3D11_MAPPED_SUBRESOURCE mappedResource {};
+		GAME_COMC (_deviceContext.Map (pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
+		memcpy (reinterpret_cast<BYTE*>(mappedResource.pData) + _destOffset, _pData, static_cast<size_t>(_cData));
+		GAME_COMC (_deviceContext.Unmap (pBuffer, 0));
+	}
 }
 
-void BufferResourceBase::ForceDestroy ()
+void BufferResource::Retrieve (void * _pData, int _cData) const
 {
-	m_Buffer.ForceDestroy ();
+	GAME_ASSERT_MSG (m_bReadable, "Not a readable resource");
+	GAME_THROW_MSG ("Unimplemented");
+	// TODO implement
 }
 
-bool BufferResourceBase::IsCreated () const
+void BufferResource::CopyTo (BufferResource & _resource) const
 {
-	return m_Buffer.IsCreated ();
+	GAME_ASSERT_MSG (!m_bImmutable || _resource.m_BindModes & BindMode::StreamOutput, "Immutable resource without StreamOutput bind mode");
+	GAME_THROW_MSG ("Unimplemented");
+	// TODO implement
 }
 
-ID3D11Buffer * BufferResourceBase::GetPointer () const
+BufferResource::BindMode BufferResource::GetBindModes () const
 {
-	return m_Buffer.GetPointer ();
+	return m_BindModes;
 }
 
-void IndexBufferResourceBase::Reset (ID3D11DeviceContext & _deviceContext)
+bool BufferResource::IsImmutable () const
+{
+	return m_bImmutable;
+}
+
+bool BufferResource::IsReadable () const
+{
+	return m_bReadable;
+}
+
+void BufferResource::ResetIndexBuffer (ID3D11DeviceContext & _deviceContext)
 {
 	_deviceContext.IASetIndexBuffer (nullptr, DXGI_FORMAT_UNKNOWN, 0);
 }
 
-void IndexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext) const
+void BufferResource::SetVertexBuffers (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, const BufferResource*const* _pBuffers, const UINT * _pStructSizes, const UINT * _pOffsets, int _cBuffer)
 {
-	GAME_RESOURCE_ASSERT_CREATED;
-	_deviceContext.IASetIndexBuffer (GetPointer (), GetFormat (), 0);
-}
-
-void VertexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const VertexBufferResourceBase*> _buffers)
-{
-	if (!_buffers.empty ())
+	GAME_ASSERT_MSG (_cBuffer >= 0, "Buffer count cannot be negative");
+	if (_cBuffer > 0)
 	{
-		std::vector<ID3D11Buffer*> bufs { _buffers.size () };
-		std::vector<UINT> offsets (_buffers.size ());
-		std::vector<UINT> strides (_buffers.size ());
-		for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
+		std::vector<ID3D11Buffer*> bufs (static_cast<size_t>(_cBuffer));
+		for (int iBuf { 0 }; iBuf < _cBuffer; iBuf++)
 		{
-			if (_buffers[iBuf])
+			if (_pBuffers[iBuf])
 			{
-				GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
-				bufs[iBuf] = _buffers[iBuf]->GetPointer ();
-				offsets[iBuf] = 0;
-				strides[iBuf] = static_cast<UINT>(_buffers[iBuf]->GetStride ());
-			}
-			else
-			{
-				bufs[iBuf] = nullptr;
-				offsets[iBuf] = 0;
-				strides[iBuf] = 0;
-			}
-		}
-		_deviceContext.IASetVertexBuffers (static_cast<UINT>(_startingSlot), 1, bufs.data (), strides.data (), offsets.data ());
-	}
-}
-
-void VertexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _slot) const
-{
-	GAME_RESOURCE_ASSERT_CREATED;
-	const UINT strides[] { static_cast<UINT>(GetStride ()) };
-	const UINT offsets[] { 0 };
-	ID3D11Buffer * pBuffers[] { GetPointer () };
-	_deviceContext.IASetVertexBuffers (static_cast<UINT>(_slot), 1, pBuffers, strides, offsets);
-}
-
-void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, const std::vector<const ConstantBufferResourceBase*>& _buffers, ShaderType _shaderType)
-{
-	if (!_buffers.empty ())
-	{
-		std::vector<ID3D11Buffer*> bufs { _buffers.size () };
-		for (int iBuf { 0 }; iBuf < _buffers.size (); iBuf++)
-		{
-			if (_buffers[iBuf])
-			{
-				GAME_ASSERT_MSG (_buffers[iBuf]->IsCreated (), "Not created");
-				bufs[iBuf] = _buffers[iBuf]->GetPointer ();
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->IsCreated (), "Not created");
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->m_BindModes & BindMode::VertexBuffer, "Not a vertex buffer");
+				bufs[iBuf] = _pBuffers[iBuf]->GetPointer ();
 			}
 			else
 			{
 				bufs[iBuf] = nullptr;
 			}
 		}
-		switch (_shaderType)
-		{
-			case ShaderType::VertexShader:
-				_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			case ShaderType::PixelShader:
-				_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			case ShaderType::GeometryShader:
-				_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			case ShaderType::HullShader:
-				_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			case ShaderType::DomainShader:
-				_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			case ShaderType::ComputeShader:
-				_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_buffers.size ()), bufs.data ());
-				break;
-			default:
-				GAME_THROW_MSG ("Unknown type");
-				break;
-		}
+		_deviceContext.IASetVertexBuffers (_startingSlot, static_cast<UINT>(_cBuffer), bufs.data (), _pStructSizes, _pOffsets);
 	}
 }
 
-void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
+void BufferResource::SetVertexBuffers (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, const BufferResource*const* _pBuffers, int _cBuffer)
 {
-	ID3D11Buffer * pBuffers[] { GetPointer () };
-	switch (_shaderType)
+	GAME_ASSERT_MSG (_cBuffer >= 0, "Buffer count cannot be negative");
+	if (_cBuffer > 0)
+	{
+		std::vector<UINT> structSizes (static_cast<size_t>(_cBuffer));
+		for (int iBuf { 0 }; iBuf < _cBuffer; iBuf++)
+		{
+			if (_pBuffers[iBuf])
+			{
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->IsCreated (), "Not created");
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->m_BindModes & BindMode::VertexBuffer, "Not a vertex buffer");
+				structSizes[iBuf] = _pBuffers[iBuf]->m_StructSize;
+			}
+			else
+			{
+				structSizes[iBuf] = 0;
+			}
+		}
+		std::vector<UINT> offsets (static_cast<size_t>(_cBuffer), 0);
+		SetVertexBuffers (_deviceContext, _startingSlot, _pBuffers, structSizes.data (), offsets.data (), _cBuffer);
+	}
+}
+
+void BufferResource::SetConstantBuffers (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, ShaderType _shader, const BufferResource*const* _pBuffers, int _cBuffer)
+{
+	GAME_ASSERT_MSG (_cBuffer >= 0, "Buffer count cannot be negative");
+	if (_cBuffer > 0)
+	{
+		std::vector<ID3D11Buffer*> bufs (static_cast<size_t>(_cBuffer));
+		for (int iBuf { 0 }; iBuf < _cBuffer; iBuf++)
+		{
+			if (_pBuffers[iBuf])
+			{
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->IsCreated (), "Not created");
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->m_BindModes & BindMode::VertexBuffer, "Not a vertex buffer");
+				bufs[iBuf] = _pBuffers[iBuf]->GetPointer ();
+			}
+			else
+			{
+				bufs[iBuf] = nullptr;
+			}
+		}
+		SetConstantBuffers (_deviceContext, static_cast<UINT>(_startingSlot), static_cast<UINT>(_cBuffer), bufs.data (), _shader);
+	}
+}
+
+void BufferResource::SetStreamOutputBuffers (ID3D11DeviceContext & _deviceContext, const BufferResource*const* _pBuffers, const UINT * _pOffsets, int _cBuffer)
+{
+	GAME_ASSERT_MSG (_cBuffer >= 0, "Buffer count cannot be negative");
+	if (_cBuffer > 0)
+	{
+		std::vector<ID3D11Buffer*> bufs (static_cast<size_t>(_cBuffer));
+		for (int iBuf { 0 }; iBuf < _cBuffer; iBuf++)
+		{
+			if (_pBuffers[iBuf])
+			{
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->IsCreated (), "Not created");
+				GAME_ASSERT_MSG (_pBuffers[iBuf]->m_BindModes & BindMode::VertexBuffer, "Not a vertex buffer");
+				bufs[iBuf] = _pBuffers[iBuf]->GetPointer ();
+			}
+			else
+			{
+				bufs[iBuf] = nullptr;
+			}
+		}
+		_deviceContext.SOSetTargets (static_cast<UINT>(_cBuffer), bufs.data (), _pOffsets);
+	}
+}
+
+void BufferResource::SetStreamOutputBuffers (ID3D11DeviceContext & _deviceContext, const BufferResource*const* _pBuffers, int _cBuffer)
+{
+	std::vector<UINT> offsets (static_cast<size_t>(_cBuffer), 0);
+	SetStreamOutputBuffers (_deviceContext, _pBuffers, offsets.data (), _cBuffer);
+}
+
+void BufferResource::SetIndexBuffer (ID3D11DeviceContext & _deviceContext, size_t _structSize, UINT _offset) const
+{
+	DXGI_FORMAT format;
+	switch (_structSize)
+	{
+		case 1:
+			format = DXGI_FORMAT_R8_UINT;
+			break;
+		case 2:
+			format = DXGI_FORMAT_R16_UINT;
+			break;
+		case 4:
+			format = DXGI_FORMAT_R32_UINT;
+			break;
+		default:
+			GAME_THROW_MSG ("Unsupported index size");
+	}
+	_deviceContext.IASetIndexBuffer (GetPointer (), format, _offset);
+}
+
+void BufferResource::SetIndexBuffer (ID3D11DeviceContext & _deviceContext) const
+{
+	SetIndexBuffer (_deviceContext, m_StructSize, 0);
+}
+
+void BufferResource::SetVertexBuffer (ID3D11DeviceContext & _deviceContext, UINT _slot, UINT _structSize, UINT _offset) const
+{
+	ID3D11Buffer* pBuf { GetPointer () };
+	_deviceContext.IASetVertexBuffers (_slot, 1, &pBuf, &_structSize, &_offset);
+}
+
+void BufferResource::SetVertexBuffer (ID3D11DeviceContext & _deviceContext, UINT _slot) const
+{
+	SetVertexBuffer (_deviceContext, _slot, m_StructSize, 0);
+}
+
+void BufferResource::SetConstantBuffer (ID3D11DeviceContext & _deviceContext, UINT _slot, ShaderType _shader) const
+{
+	ID3D11Buffer* pBuf { GetPointer () };
+	SetConstantBuffers (_deviceContext, _slot, 1, &pBuf, _shader);
+}
+
+void BufferResource::SetStreamOutputBuffer (ID3D11DeviceContext & _deviceContext, UINT _offset) const
+{
+	ID3D11Buffer* pBuf { GetPointer () };
+	_deviceContext.SOSetTargets (1, &pBuf, &_offset);
+}
+
+void BufferResource::SetStreamOutputBuffer (ID3D11DeviceContext & _deviceContext) const
+{
+	SetStreamOutputBuffer (_deviceContext, 0);
+}
+
+ID3D11Buffer * BufferResource::Create (ID3D11Device & _device) const
+{
+	D3D11_BUFFER_DESC description;
+
+	description.ByteWidth = static_cast<UINT>(m_Length * m_StructSize);
+
+	description.BindFlags = 0;
+	if (m_BindModes & BindMode::IndexBuffer)
+	{
+		description.BindFlags |= D3D11_BIND_INDEX_BUFFER;
+	}
+	if (m_BindModes & BindMode::VertexBuffer)
+	{
+		description.BindFlags |= D3D11_BIND_VERTEX_BUFFER;
+	}
+	if (m_BindModes & BindMode::ConstantBuffer)
+	{
+		description.BindFlags |= D3D11_BIND_CONSTANT_BUFFER;
+	}
+	if (m_BindModes & BindMode::StreamOutput)
+	{
+		description.BindFlags |= D3D11_BIND_STREAM_OUTPUT;
+	}
+
+	description.CPUAccessFlags = 0;
+	if (m_bReadable)
+	{
+		description.CPUAccessFlags |= D3D11_CPU_ACCESS_READ;
+	}
+	if (!m_bImmutable)
+	{
+		description.CPUAccessFlags |= D3D11_CPU_ACCESS_WRITE;
+	}
+
+	description.MiscFlags = 0;
+
+	description.StructureByteStride = m_StructSize;
+
+	if (m_bReadable)
+	{
+		description.Usage = D3D11_USAGE_STAGING;
+	}
+	else
+	{
+		if (m_BindModes & BindMode::StreamOutput)
+		{
+			description.Usage = D3D11_USAGE_DEFAULT;
+		}
+		else
+		{
+			description.Usage = m_bImmutable ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DYNAMIC;
+		}
+	}
+
+	ID3D11Buffer * pBuffer;
+
+	const void * pInitialData { ProvideInitialData () };
+
+	if (pInitialData)
+	{
+		D3D11_SUBRESOURCE_DATA data;
+		data.pSysMem = pInitialData;
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
+
+		GAME_COMC (_device.CreateBuffer (&description, &data, &pBuffer));
+	}
+	else
+	{
+		GAME_ASSERT_MSG (!m_bImmutable || m_BindModes & BindMode::StreamOutput, "Immutable resources without StreamOutput bind mode must provide initial data");
+		GAME_COMC (_device.CreateBuffer (&description, nullptr, &pBuffer));
+	}
+
+	return pBuffer;
+}
+
+void BufferResource::SetConstantBuffers (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, UINT _count, ID3D11Buffer * const * _pBuffers, ShaderType _shader)
+{
+	switch (_shader)
 	{
 		case ShaderType::VertexShader:
-			_deviceContext.VSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.VSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		case ShaderType::PixelShader:
-			_deviceContext.PSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.PSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		case ShaderType::GeometryShader:
-			_deviceContext.GSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.GSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		case ShaderType::HullShader:
-			_deviceContext.HSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.HSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		case ShaderType::DomainShader:
-			_deviceContext.DSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.DSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		case ShaderType::ComputeShader:
-			_deviceContext.CSSetConstantBuffers (static_cast<UINT>(_slot), 1, pBuffers);
+			_deviceContext.CSSetConstantBuffers (_startingSlot, _count, _pBuffers);
 			break;
 		default:
 			GAME_THROW_MSG ("Unknown type");
-			break;
 	}
+}
+
+const void * GenericBufferResource::ProvideInitialData () const
+{
+	return pInitialData;
 }

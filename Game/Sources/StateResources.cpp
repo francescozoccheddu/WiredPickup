@@ -2,6 +2,7 @@
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
+#include "Include\Game\Resources\StateResources.hpp"
 
 void RasterizerStateResource::Reset (ID3D11DeviceContext & _deviceContext)
 {
@@ -54,77 +55,32 @@ ID3D11BlendState * BlendStateResource::Create (ID3D11Device & _device) const
 	return pState;
 }
 
-void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _startingSlot, ShaderType _shaderType, const std::vector<const SamplerStateResource*> _samplers)
+void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, ShaderType _shaderType, const SamplerStateResource*const* _pSamplerStates, int _cSamplerState)
 {
-	if (!_samplers.empty ())
+	GAME_ASSERT_MSG (_cSamplerState >= 0, "Sampler state count cannot be negative");
+	if (_cSamplerState > 0)
 	{
-		std::vector<ID3D11SamplerState*> samplers { _samplers.size () };
-		for (int iBuf { 0 }; iBuf < _samplers.size (); iBuf++)
+		std::vector<ID3D11SamplerState*> samplerStates (static_cast<size_t>(_cSamplerState));
+		for (int iBuf { 0 }; iBuf < _cSamplerState; iBuf++)
 		{
-			if (_samplers[iBuf])
+			if (_pSamplerStates[iBuf])
 			{
-				GAME_ASSERT_MSG (_samplers[iBuf]->IsCreated (), "Not created");
-				samplers[iBuf] = _samplers[iBuf]->GetPointer ();
+				GAME_ASSERT_MSG (_pSamplerStates[iBuf]->IsCreated (), "Not created");
+				samplerStates[iBuf] = _pSamplerStates[iBuf]->GetPointer ();
 			}
 			else
 			{
-				samplers[iBuf] = nullptr;
+				samplerStates[iBuf] = nullptr;
 			}
 		}
-		switch (_shaderType)
-		{
-			case ShaderType::VertexShader:
-				_deviceContext.VSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			case ShaderType::PixelShader:
-				_deviceContext.PSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			case ShaderType::GeometryShader:
-				_deviceContext.GSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			case ShaderType::HullShader:
-				_deviceContext.HSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			case ShaderType::DomainShader:
-				_deviceContext.DSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			case ShaderType::ComputeShader:
-				_deviceContext.CSSetSamplers (static_cast<UINT>(_startingSlot), static_cast<UINT>(_samplers.size ()), samplers.data ());
-				break;
-			default:
-				GAME_THROW_MSG ("Unknown type");
-				break;
-		}
+		Set (_deviceContext, _startingSlot, _shaderType, samplerStates.data (), _cSamplerState);
 	}
 }
 
-void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, int _slot, ShaderType _shaderType) const
+void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, UINT _slot, ShaderType _shaderType) const
 {
-	ID3D11SamplerState * pSamplers[] { GetPointer () };
-	switch (_shaderType)
-	{
-		case ShaderType::VertexShader:
-			GAME_COMC (_deviceContext.VSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		case ShaderType::PixelShader:
-			GAME_COMC (_deviceContext.PSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		case ShaderType::GeometryShader:
-			GAME_COMC (_deviceContext.GSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		case ShaderType::HullShader:
-			GAME_COMC (_deviceContext.HSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		case ShaderType::DomainShader:
-			GAME_COMC (_deviceContext.DSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		case ShaderType::ComputeShader:
-			GAME_COMC (_deviceContext.CSSetSamplers (static_cast<UINT>(_slot), 1, pSamplers));
-			break;
-		default:
-			GAME_THROW_MSG ("Unknown type");
-			break;
-	}
+	ID3D11SamplerState * pState { GetPointer () };
+	Set (_deviceContext, _slot, _shaderType, &pState, 1);
 }
 
 ID3D11SamplerState * SamplerStateResource::Create (ID3D11Device & _device) const
@@ -132,4 +88,31 @@ ID3D11SamplerState * SamplerStateResource::Create (ID3D11Device & _device) const
 	ID3D11SamplerState * pState;
 	GAME_COMC (_device.CreateSamplerState (&description, &pState));
 	return pState;
+}
+
+void SamplerStateResource::Set (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, ShaderType _shaderType, ID3D11SamplerState*const* _pSamplerStates, int _cSamplerStates)
+{
+	switch (_shaderType)
+	{
+		case ShaderType::VertexShader:
+			_deviceContext.VSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		case ShaderType::PixelShader:
+			_deviceContext.PSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		case ShaderType::GeometryShader:
+			_deviceContext.GSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		case ShaderType::HullShader:
+			_deviceContext.HSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		case ShaderType::DomainShader:
+			_deviceContext.DSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		case ShaderType::ComputeShader:
+			_deviceContext.CSSetSamplers (_startingSlot, static_cast<UINT>(_cSamplerStates), _pSamplerStates);
+			break;
+		default:
+			GAME_THROW_MSG ("Unknown type");
+	}
 }
