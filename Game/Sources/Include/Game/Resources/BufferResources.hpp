@@ -7,224 +7,217 @@
 #include <vector>
 #include <cstdint>
 
-#define GAME_BUFFERRESOURCE_ASSERT_PROVIDED {GAME_ASSERT_MSG (pProvider, "Buffer provider is nullptr");}
-
 class BufferResource : public SimpleResource<ID3D11Buffer>
 {
 
 public:
 
-	using SimpleResource::GetPointer;
-
-	D3D11_BUFFER_DESC description;
-	D3D11_SUBRESOURCE_DATA initialData;
-	bool bInitialize { false };
-
-private:
-
-	virtual ID3D11Buffer * Create (ID3D11Device & device) const override final;
-
-};
-
-template<typename T>
-struct BufferProvider
-{
-
-	virtual int GetLength () const = 0;
-
-	virtual const T * GetData () const = 0;
-
-};
-
-template<typename T>
-struct Buffer : public BufferProvider<T>
-{
-
-	virtual inline const T * GetData () const override
+	enum BindMode
 	{
-		return data.data ();
-	}
+		None = 0,
+		IndexBuffer = 1 << 0,
+		VertexBuffer = 1 << 1,
+		ConstantBuffer = 1 << 2,
+		StreamOutput = 1 << 3
+	};
 
-	virtual inline int GetLength () const override
+
+	BufferResource (BindMode bindModes, bool bImmutable, bool bReadable, size_t structSize, int length);
+
+	void Update (ID3D11DeviceContext& deviceContext, const void * pData, int cData, int destOffset);
+
+	void Retrieve (void * pData, int cData) const;
+
+	void CopyTo (BufferResource& resource) const;
+
+	BindMode GetBindModes () const;
+
+	bool IsImmutable () const;
+
+	bool IsReadable () const;
+
+	// TODO check slot count (like D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT)
+
+	static void ResetIndexBuffer (ID3D11DeviceContext& deviceContext);
+
+	static void SetVertexBuffers (ID3D11DeviceContext& deviceContext, UINT startingSlot, const BufferResource*const* pBuffers, const UINT * pStructSizes, const UINT * pOffsets, int cBuffers);
+
+	static void SetVertexBuffers (ID3D11DeviceContext& deviceContext, UINT startingSlot, const BufferResource*const* pBuffers, int cBuffers);
+
+	static void SetConstantBuffers (ID3D11DeviceContext& deviceContext, UINT startingSlot, ShaderType shader, const BufferResource*const* pBuffers, int cBuffers);
+
+	static void SetStreamOutputBuffers (ID3D11DeviceContext& deviceContext, const BufferResource*const* pBuffers, const UINT * pOffsets, int cBuffers);
+
+	static void SetStreamOutputBuffers (ID3D11DeviceContext& deviceContext, const BufferResource*const* pBuffers, int cBuffers);
+
+	void SetIndexBuffer (ID3D11DeviceContext& deviceContext, size_t structSize, UINT offset) const;
+
+	void SetIndexBuffer (ID3D11DeviceContext& deviceContext) const;
+
+	void SetVertexBuffer (ID3D11DeviceContext& deviceContext, UINT slot, UINT structSize, UINT offset) const;
+
+	void SetVertexBuffer (ID3D11DeviceContext& deviceContext, UINT slot) const;
+
+	void SetConstantBuffer (ID3D11DeviceContext& deviceContext, UINT slot, ShaderType shader) const;
+
+	void SetStreamOutputBuffer (ID3D11DeviceContext& deviceContext, UINT offset) const;
+
+	void SetStreamOutputBuffer (ID3D11DeviceContext& deviceContext) const;
+
+	static constexpr inline int GetBoundingConstantBufferSize (int _size)
 	{
-		return static_cast<int>(data.size ());
+		int remainder = _size % 16;
+		if (remainder > 0)
+		{
+			return _size + 16 - remainder;
+		}
+		else
+		{
+			return _size;
+		}
 	}
-
-	std::vector<T> data;
-
-};
-
-template<typename T>
-struct SingletonBuffer : public BufferProvider<T>
-{
-
-	virtual inline const T * GetData () const override
-	{
-		return &data;
-	}
-
-	virtual inline int GetLength () const override
-	{
-		return static_cast<int>(data.size ());
-	}
-
-	T data;
-
-};
-
-class BufferResourceBase : public AtomicResource
-{
-
-public:
-
-	virtual void ForceCreate (ID3D11Device & device) override final;
-
-	virtual void ForceDestroy () override final;
-
-	virtual bool IsCreated () const override final;
 
 protected:
 
-	virtual void Prepare (BufferResource& buffer) = 0;
+	virtual ID3D11Buffer * Create (ID3D11Device& device) const override final;
 
-	ID3D11Buffer * GetPointer () const;
+	virtual const void * ProvideInitialData () const = 0;
 
 private:
 
-	BufferResource m_Buffer;
+	const BindMode m_BindModes;
+	const bool m_bImmutable;
+	const bool m_bReadable;
+	const UINT m_StructSize;
+	const int m_Length;
+
+	static void SetConstantBuffers (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, UINT _count, ID3D11Buffer * const * _pBuffers, ShaderType _shader);
 
 };
 
-class IndexBufferResourceBase : public BufferResourceBase
+inline BufferResource::BindMode operator | (BufferResource::BindMode a, BufferResource::BindMode b)
+{
+	return static_cast<BufferResource::BindMode>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline BufferResource::BindMode operator & (BufferResource::BindMode a, BufferResource::BindMode b)
+{
+	return static_cast<BufferResource::BindMode>(static_cast<int>(a) & static_cast<int>(b));
+}
+
+inline BufferResource::BindMode& operator |= (BufferResource::BindMode& a, BufferResource::BindMode b)
+{
+	return a = a | b;
+}
+
+class GenericBufferResource : public BufferResource
 {
 
 public:
+
+	using BufferResource::BufferResource;
+
+	const void * pInitialData { nullptr };
+
+private:
+
+	virtual const void * ProvideInitialData () const override final;
+
+};
+
+/*
+
+class IndexBufferResource : public BufferResource
+{
+
+public:
+
+	//TODO Add constructors
 
 	static void Reset (ID3D11DeviceContext& deviceContext);
 
 	void Set (ID3D11DeviceContext& deviceContext) const;
 
-protected:
-
-	virtual DXGI_FORMAT GetFormat () const = 0;
-
 };
 
-template<unsigned int bytePrecision>
-class StaticIndexBufferResource : public IndexBufferResourceBase
+template<unsigned int precBytes>
+class VectorIndexBufferResource : public IndexBufferResource
 {
+
+	static_assert(precBytes == 1 || precBytes == 2 || precBytes == 4, "Unsupported precision");
 
 public:
 
-	static_assert(bytePrecision == 1 || bytePrecision == 2 || bytePrecision == 4, "Unsupported precision");
+	//TODO Add constructors
 
-	using ind_t = std::conditional<bytePrecision == 1, uint8_t, std::conditional<bytePrecision == 2, uint16_t, uint32_t>>;
+	std::vector<ind_t> data;
+	bool bInitialize { false };
 
-	int GetLength () const
+	using ind_t = std::conditional<precBytes == 1, uint8_t, std::conditional<precBytes == 2, uint16_t, uint32_t>>;
+
+	void Update (ID3D11DeviceContext& _deviceContext, int _count)
 	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		return pProvider->GetLength ();
+		GAME_ASSERT_MSG (_srcOffset >= 0 && _count >= 0, "Count and offset arguments cannot be negative");
+		GAME_ASSERT_MSG (_srcOffset + _count > data.size (), "Out of bounds");
+		BufferResource::Update (_deviceContext, data.data (), static_cast<int>(_count * sizeof (ind_t)), 0);
 	}
 
-	const BufferProvider<ind_t> * pProvider;
-
-private:
-
-	virtual DXGI_FORMAT GetFormat () const override final
+	void Update (ID3D11DeviceContext& _deviceContext)
 	{
-		switch (bytePrecision)
-		{
-			case 1:
-				return DXGI_FORMAT_R8_UINT;
-			case 2:
-				return DXGI_FORMAT_R16_UINT;
-			case 4:
-				return DXGI_FORMAT_R32_UINT;
-			default:
-				GAME_THROW_MSG ("Unsupported precision");
-		}
-	}
-
-	virtual void Prepare (BufferResource& _buffer) override final
-	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		_buffer.bInitialize = true;
-		// Description
-		_buffer.description.BindFlags = D3D11_BIND_INDEX_BUFFER;
-		_buffer.description.ByteWidth = static_cast<UINT>(pProvider->GetLength () * sizeof (ind_t));
-		_buffer.description.CPUAccessFlags = 0;
-		_buffer.description.MiscFlags = 0;
-		_buffer.description.StructureByteStride = static_cast<UINT>(sizeof (ind_t));
-		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
-		// Data
-		_buffer.initialData.pSysMem = pProvider->GetData ();
-		_buffer.initialData.SysMemPitch = 0;
-		_buffer.initialData.SysMemSlicePitch = 0;
+		Update (_deviceContext, data.size ());
 	}
 
 };
 
-class VertexBufferResourceBase : public BufferResourceBase
+class VertexBufferResource : public BufferResource
 {
 
 public:
 
-	static void Set (ID3D11DeviceContext& deviceContext, int startingSlot, const std::vector<const VertexBufferResourceBase *> buffers);
+	//TODO Add constructors
 
-	void Set (ID3D11DeviceContext& deviceContext, int slot) const;
+	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const BufferResource*>& buffers);
 
-protected:
-
-	virtual size_t GetStride () const = 0;
+	void Set (ID3D11DeviceContext& deviceContext) const;
 
 };
 
 template<typename T>
-class StaticVertexBufferResource : public VertexBufferResourceBase
+class VectorVertexBufferResource : public VertexBufferResource
 {
 
 public:
 
-	int GetLength () const
+	//TODO Add constructors
+
+	std::vector<T> data;
+	bool bInitialize { false };
+
+	void Update (ID3D11DeviceContext& _deviceContext, int _count)
 	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		return pProvider->GetLength ();
+		GAME_ASSERT_MSG (_srcOffset >= 0 && _count >= 0, "Count and offset arguments cannot be negative");
+		GAME_ASSERT_MSG (_srcOffset + _count > data.size (), "Out of bounds");
+		BufferResource::Update (_deviceContext, data.data (), static_cast<int>(_count * sizeof (T)), 0);
 	}
 
-	const BufferProvider<T> * pProvider;
+	void Update (ID3D11DeviceContext& _deviceContext)
+	{
+		Update (_deviceContext, data.size ());
+	}
 
 private:
 
-	virtual void Prepare (BufferResource & _buffer) override
-	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		_buffer.bInitialize = true;
-		// Description
-		_buffer.description.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		_buffer.description.ByteWidth = static_cast<UINT>(pProvider->GetLength () * sizeof (ind_t));
-		_buffer.description.CPUAccessFlags = 0;
-		_buffer.description.MiscFlags = 0;
-		_buffer.description.StructureByteStride = static_cast<UINT>(sizeof (ind_t));
-		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
-		// Data
-		_buffer.initialData.pSysMem = pProvider->GetData ();
-		_buffer.initialData.SysMemPitch = 0;
-		_buffer.initialData.SysMemSlicePitch = 0;
-	}
-
-	virtual size_t GetStride () const override
-	{
-		return sizeof (T);
-	}
 
 };
 
-class ConstantBufferResourceBase : public BufferResourceBase
+class ConstantBufferResource : public BufferResource
 {
 
 public:
 
-	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const ConstantBufferResourceBase*>& buffers, ShaderType shaderType);
+	//TODO Add constructors
+
+	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const BufferResource*>& buffers, ShaderType shaderType);
 
 	void Set (ID3D11DeviceContext & deviceContext, int slot, ShaderType shaderType) const;
 
@@ -244,83 +237,30 @@ public:
 };
 
 template<typename T>
-class StaticConstantBufferResource final : public ConstantBufferResourceBase
+class StructConstantBufferResource final : public ConstantBufferResource
 {
 
 public:
 
-	int GetLength () const
-	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		return pProvider->GetLength ();
-	}
-
-	const BufferProvider<T> * pProvider;
-
-private:
-
-	virtual void Prepare (BufferResource & _buffer) override final
-	{
-		GAME_BUFFERRESOURCE_ASSERT_PROVIDED;
-		_buffer.bInitialize = true;
-		// Description
-		_buffer.description.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		_buffer.description.ByteWidth = sizeof (T) * pProvider->GetLength ();
-		_buffer.description.CPUAccessFlags = 0;
-		_buffer.description.MiscFlags = 0;
-		_buffer.description.StructureByteStride = 0;
-		_buffer.description.Usage = D3D11_USAGE_IMMUTABLE;
-		// Data
-		_buffer.initialData.pSysMem = pProvider->GetData ();
-		_buffer.initialData.SysMemPitch = 0;
-		_buffer.initialData.SysMemSlicePitch = 0;
-	}
-
-};
-
-template<typename T>
-class DynamicConstantBufferResource final : public ConstantBufferResourceBase
-{
-
-public:
-
-	void Update (ID3D11DeviceContext & _deviceContext, int _cData) const
-	{
-		GAME_RESOURCE_ASSERT_CREATED;
-		GAME_ASSERT_MSG (_cData > 0 && _cData <= sizeof (T), "Invalid data size");
-		D3D11_MAPPED_SUBRESOURCE mappedResource {};
-		GAME_COMC (_deviceContext.Map (m_pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-		memcpy (mappedResource.pData, &data, static_cast<size_t>(_cData));
-		GAME_COMC (_deviceContext.Unmap (m_pBuffer, 0));
-	}
-
-	void Update (ID3D11DeviceContext & _deviceContext) const
-	{
-		Update (_deviceContext, sizeof (T));
-	}
+	//TODO Add constructors
 
 	T data;
-	bool bInitialize;
+	bool bInitialize { false };
+
+	void Update (ID3D11DeviceContext& _deviceContext, int _size)
+	{
+		GAME_ASSERT_MSG (_size > 0 && _size < sizeof (T), "Invalid size");
+		BufferResource::Update (_deviceContext, &data, _size, 0);
+	}
+
+	void Update (ID3D11DeviceContext& _deviceContext)
+	{
+		Update (_deviceContext, static_cast<int>(sizeof (T)));
+	}
 
 private:
 
-	virtual void Prepare (BufferResource & _buffer) override final
-	{
-		int size = GetBoundingBufferSize (static_cast<int>(sizeof (T)));
-		GAME_ASSERT_MSG (size % 16 == 0, "Size is not a multiple of 16");
-		GAME_ASSERT_MSG (size / 16 <= D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT, "Size exceeds maximum value");
-		_buffer.bInitialize = bInitialize;
-		// Description
-		_buffer.description.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		_buffer.description.ByteWidth = size;
-		_buffer.description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		_buffer.description.MiscFlags = 0;
-		_buffer.description.StructureByteStride = 0;
-		_buffer.description.Usage = D3D11_USAGE_DYNAMIC;
-		// Data
-		_buffer.initialData.pSysMem = &data;
-		_buffer.initialData.SysMemPitch = 0;
-		_buffer.initialData.SysMemSlicePitch = 0;
-	}
 
 };
+
+*/

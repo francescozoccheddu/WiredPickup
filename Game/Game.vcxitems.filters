@@ -66,6 +66,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)TextureResource.cpp">
       <Filter>Sources\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResourceViewResource.cpp">
+      <Filter>Sources\Resources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Windows.hpp">
@@ -135,6 +138,9 @@
       <Filter>Sources\Resources</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\TextureResource.hpp">
+      <Filter>Sources\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Resources\ShaderResourceViewResource.hpp">
       <Filter>Sources\Resources</Filter>
     </ClInclude>
   </ItemGroup>
