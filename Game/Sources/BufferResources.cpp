@@ -1,4 +1,5 @@
 #include <Game\Resources\BufferResources.hpp>
+#include "Include\Game\Resources\BufferResources.hpp"
 
 BufferResource::BufferResource (BindMode _bindModes, bool _bImmutable, bool _bReadable, size_t _structSize, int _length)
 	: m_BindModes { _bindModes }, m_bImmutable { _bImmutable }, m_bReadable { _bReadable }, m_StructSize { static_cast<UINT>(_structSize) }, m_Length { _length }
@@ -9,7 +10,7 @@ BufferResource::BufferResource (BindMode _bindModes, bool _bImmutable, bool _bRe
 	GAME_ASSERT_MSG (!(_bindModes & BindMode::ConstantBuffer) || (_structSize * _length) % 16 == 0, "Constant buffer size must be multiple of 16");
 }
 
-void BufferResource::Update (ID3D11DeviceContext& _deviceContext, const void * _pData, int _cData, int _destOffset)
+void BufferResource::Update (ID3D11DeviceContext& _deviceContext, const void * _pData, size_t _cData, int _destOffset)
 {
 	GAME_ASSERT_MSG (!m_bImmutable, "Immutable resource");
 	GAME_ASSERT_MSG (_cData > 0 && _destOffset > 0, "Invalid data size arguments");
@@ -29,13 +30,15 @@ void BufferResource::Update (ID3D11DeviceContext& _deviceContext, const void * _
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedResource {};
 		GAME_COMC (_deviceContext.Map (pBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource));
-		memcpy (reinterpret_cast<BYTE*>(mappedResource.pData) + _destOffset, _pData, static_cast<size_t>(_cData));
+		memcpy (reinterpret_cast<BYTE*>(mappedResource.pData) + _destOffset, _pData, _cData);
 		GAME_COMC (_deviceContext.Unmap (pBuffer, 0));
 	}
 }
 
 void BufferResource::Retrieve (void * _pData, int _cData) const
 {
+	UNREFERENCED_PARAMETER (_pData);
+	UNREFERENCED_PARAMETER (_cData);
 	GAME_ASSERT_MSG (m_bReadable, "Not a readable resource");
 	GAME_THROW_MSG ("Unimplemented");
 	// TODO implement
@@ -61,6 +64,16 @@ bool BufferResource::IsImmutable () const
 bool BufferResource::IsReadable () const
 {
 	return m_bReadable;
+}
+
+size_t BufferResource::GetStructSize () const
+{
+	return static_cast<size_t>(m_StructSize);
+}
+
+int BufferResource::GetLength () const
+{
+	return m_Length;
 }
 
 void BufferResource::ResetIndexBuffer (ID3D11DeviceContext & _deviceContext)
@@ -326,4 +339,56 @@ void BufferResource::SetConstantBuffers (ID3D11DeviceContext & _deviceContext, U
 const void * GenericBufferResource::ProvideInitialData () const
 {
 	return pInitialData;
+}
+
+IndexBufferResourceBase::IndexBufferResourceBase (bool _bImmutable, size_t _indSize, int _length)
+	: BufferResource { BindMode::IndexBuffer, _bImmutable, false, _indSize, _length }
+{
+	switch (_indSize)
+	{
+		case 1:
+		case 2:
+		case 4:
+			break;
+		default:
+			GAME_THROW_MSG ("Unsupported index size");
+	}
+}
+
+void IndexBufferResourceBase::Reset (ID3D11DeviceContext & _deviceContext)
+{
+	BufferResource::ResetIndexBuffer (_deviceContext);
+}
+
+void IndexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext) const
+{
+	BufferResource::SetIndexBuffer (_deviceContext);
+}
+
+VertexBufferResourceBase::VertexBufferResourceBase (bool _bImmutable, size_t _vertSize, int _length)
+	: BufferResource { BindMode::VertexBuffer, _bImmutable, false, _vertSize, _length }
+{}
+
+void VertexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, const VertexBufferResourceBase * const * _pBuffers, int _cBuffers)
+{
+	BufferResource::SetVertexBuffers (_deviceContext, _startingSlot, reinterpret_cast<const BufferResource * const *>(_pBuffers), _cBuffers);
+}
+
+void VertexBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, UINT _slot) const
+{
+	BufferResource::SetVertexBuffer (_deviceContext, _slot);
+}
+
+ConstantBufferResourceBase::ConstantBufferResourceBase (bool _bImmutable, size_t _size)
+	: BufferResource { BindMode::ConstantBuffer, _bImmutable, false, _size, 1 }
+{}
+
+void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, UINT _startingSlot, ShaderType _shader, const ConstantBufferResourceBase * const * _pBuffers, int _cBuffers)
+{
+	BufferResource::SetConstantBuffers (_deviceContext, _startingSlot, _shader, reinterpret_cast<const BufferResource * const *>(_pBuffers), _cBuffers);
+}
+
+void ConstantBufferResourceBase::Set (ID3D11DeviceContext & _deviceContext, UINT _slot, ShaderType _shader) const
+{
+	BufferResource::SetConstantBuffer (_deviceContext, _slot, _shader);
 }
