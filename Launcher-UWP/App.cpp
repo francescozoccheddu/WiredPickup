@@ -150,7 +150,7 @@ struct App : implements<App, IFrameworkViewSource, IFrameworkView>
 
 protected:
 
-	void OnActivated (CoreApplicationView const & /* applicationView */, IActivatedEventArgs const & args)
+	void OnActivated (CoreApplicationView const & /* applicationView */, IActivatedEventArgs const & /*args*/)
 	{
 		m_dpi = DisplayInformation::GetForCurrentView ().LogicalDpi ();
 		CoreWindow::GetForCurrentThread ().Activate ();
@@ -171,7 +171,7 @@ protected:
 		PGAME_DO (Resume ());
 	}
 
-	void OnWindowSizeChanged (CoreWindow const & window, WindowSizeChangedEventArgs const & args)
+	void OnWindowSizeChanged (CoreWindow const & window, WindowSizeChangedEventArgs const & /*args*/)
 	{
 		m_logicalWidth = window.Bounds ().Width;
 		m_logicalHeight = window.Bounds ().Height;
@@ -278,6 +278,9 @@ private:
 					case DisplayOrientations::PortraitFlipped:
 						rotation = WindowRotation::ROTATE_90;
 						break;
+
+					default:
+						GAME_THROW_MSG ("Unknown orientation");
 				}
 				break;
 
@@ -299,8 +302,14 @@ private:
 					case DisplayOrientations::PortraitFlipped:
 						rotation = WindowRotation::ROTATE_180;
 						break;
+
+					default:
+						GAME_THROW_MSG ("Unknown orientation");
 				}
 				break;
+
+			default:
+				GAME_THROW_MSG ("Unknown orientation");
 		}
 
 		return rotation;

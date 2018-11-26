@@ -24,7 +24,7 @@ public:
 
 	BufferResource (BindMode bindModes, bool bImmutable, bool bReadable, size_t structSize, int length);
 
-	void Update (ID3D11DeviceContext& deviceContext, const void * pData, int cData, int destOffset);
+	void Update (ID3D11DeviceContext& deviceContext, const void * pData, size_t cData, int destOffset);
 
 	void Retrieve (void * pData, int cData) const;
 
@@ -35,6 +35,10 @@ public:
 	bool IsImmutable () const;
 
 	bool IsReadable () const;
+
+	size_t GetStructSize () const;
+
+	int GetLength () const;
 
 	// TODO check slot count (like D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT)
 
@@ -64,9 +68,9 @@ public:
 
 	void SetStreamOutputBuffer (ID3D11DeviceContext& deviceContext) const;
 
-	static constexpr inline int GetBoundingConstantBufferSize (int _size)
+	static constexpr inline size_t GetBoundingConstantBufferSize (size_t _size)
 	{
-		int remainder = _size % 16;
+		size_t remainder = _size % 16;
 		if (remainder > 0)
 		{
 			return _size + 16 - remainder;
@@ -125,14 +129,12 @@ private:
 
 };
 
-/*
-
-class IndexBufferResource : public BufferResource
+class IndexBufferResourceBase : public BufferResource
 {
 
 public:
 
-	//TODO Add constructors
+	IndexBufferResourceBase (bool bImmutable, size_t vertSize, int length);
 
 	static void Reset (ID3D11DeviceContext& deviceContext);
 
@@ -140,127 +142,117 @@ public:
 
 };
 
-template<unsigned int precBytes>
-class VectorIndexBufferResource : public IndexBufferResource
+class VertexBufferResourceBase : public BufferResource
 {
-
-	static_assert(precBytes == 1 || precBytes == 2 || precBytes == 4, "Unsupported precision");
 
 public:
 
-	//TODO Add constructors
+	VertexBufferResourceBase (bool bImmutable, size_t vertSize, int length);
 
-	std::vector<ind_t> data;
-	bool bInitialize { false };
+	static void Set (ID3D11DeviceContext& deviceContext, UINT startingSlot, const VertexBufferResourceBase*const* pBuffers, int cBuffers);
 
-	using ind_t = std::conditional<precBytes == 1, uint8_t, std::conditional<precBytes == 2, uint16_t, uint32_t>>;
-
-	void Update (ID3D11DeviceContext& _deviceContext, int _count)
-	{
-		GAME_ASSERT_MSG (_srcOffset >= 0 && _count >= 0, "Count and offset arguments cannot be negative");
-		GAME_ASSERT_MSG (_srcOffset + _count > data.size (), "Out of bounds");
-		BufferResource::Update (_deviceContext, data.data (), static_cast<int>(_count * sizeof (ind_t)), 0);
-	}
-
-	void Update (ID3D11DeviceContext& _deviceContext)
-	{
-		Update (_deviceContext, data.size ());
-	}
+	void Set (ID3D11DeviceContext& deviceContext, UINT slot) const;
 
 };
 
-class VertexBufferResource : public BufferResource
+class ConstantBufferResourceBase : public BufferResource
 {
 
 public:
 
-	//TODO Add constructors
+	ConstantBufferResourceBase (bool bImmutable, size_t size);
 
-	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const BufferResource*>& buffers);
+	static void Set (ID3D11DeviceContext& deviceContext, UINT startingSlot, ShaderType shader, const ConstantBufferResourceBase*const* pBuffers, int cBuffers);
 
-	void Set (ID3D11DeviceContext& deviceContext) const;
+	void Set (ID3D11DeviceContext& deviceContext, UINT slot, ShaderType shader) const;
 
 };
 
-template<typename T>
-class VectorVertexBufferResource : public VertexBufferResource
+
+template<int indSize, bool bInitialize, int length>
+class SimpleIndexBufferResource : public IndexBufferResourceBase
 {
+
+	static_assert(indSize == 1 || indSize == 2 || indSize == 4, "Unsupported index size");
 
 public:
 
-	//TODO Add constructors
+	using ind_t = std::conditional<indSize == 1, uint8_t, std::conditional<indSize == 2, uint16_t, uint32_t>>;
 
-	std::vector<T> data;
-	bool bInitialize { false };
+	SimpleIndexBufferResource (bool _bImmutable) : IndexBufferResourceBase { _bImmutable, sizeof (ind_t), length } {}
 
-	void Update (ID3D11DeviceContext& _deviceContext, int _count)
-	{
-		GAME_ASSERT_MSG (_srcOffset >= 0 && _count >= 0, "Count and offset arguments cannot be negative");
-		GAME_ASSERT_MSG (_srcOffset + _count > data.size (), "Out of bounds");
-		BufferResource::Update (_deviceContext, data.data (), static_cast<int>(_count * sizeof (T)), 0);
-	}
+	SimpleIndexBufferResource (bool _bImmutable, const std::array<ind_t, static_cast<size_t>(length)>& _indices) : IndexBufferResourceBase { _bImmutable, sizeof (ind_t), length }, indices { _indices } {}
+
+	SimpleIndexBufferResource (bool _bImmutable, const std::array<ind_t, static_cast<size_t>(length)>&& _indices) : IndexBufferResourceBase { _bImmutable, sizeof (ind_t), length }, indices { _indices } {}
+
+	std::array<ind_t, static_cast<size_t>(length)> indices;
 
 	void Update (ID3D11DeviceContext& _deviceContext)
 	{
-		Update (_deviceContext, data.size ());
+		BufferResource::Update (_deviceContext, indices.data (), static_cast<size_t>(length * sizeof (ind_t)), 0);
 	}
 
 private:
 
-
-};
-
-class ConstantBufferResource : public BufferResource
-{
-
-public:
-
-	//TODO Add constructors
-
-	static void Set (ID3D11DeviceContext & deviceContext, int startingSlot, const std::vector<const BufferResource*>& buffers, ShaderType shaderType);
-
-	void Set (ID3D11DeviceContext & deviceContext, int slot, ShaderType shaderType) const;
-
-	static constexpr int GetBoundingBufferSize (int _size)
+	virtual const void * ProvideInitialData () const override
 	{
-		int remainder = _size % 16;
-		if (remainder > 0)
-		{
-			return _size + 16 - remainder;
-		}
-		else
-		{
-			return _size;
-		}
+		return bInitialize ? indices.data () : nullptr;
 	}
 
 };
 
-template<typename T>
-class StructConstantBufferResource final : public ConstantBufferResource
+template<typename T, bool bInitialize, int length>
+class SimpleVertexBufferResource : public VertexBufferResourceBase
 {
 
 public:
 
-	//TODO Add constructors
+	SimpleVertexBufferResource (bool _bImmutable) : VertexBufferResourceBase { _bImmutable, sizeof (T), length } {}
+
+	SimpleVertexBufferResource (bool _bImmutable, const std::array<T, static_cast<size_t>(length)>& _vertices) : VertexBufferResourceBase { _bImmutable, sizeof (ind_t), length }, vertices { _vertices } {}
+
+	SimpleVertexBufferResource (bool _bImmutable, const std::array<T, static_cast<size_t>(length)>&& _vertices) : VertexBufferResourceBase { _bImmutable, sizeof (ind_t), length }, vertices { _vertices } {}
+
+	std::array<T, static_cast<size_t>(length)> vertices;
+
+	void Update (ID3D11DeviceContext& _deviceContext)
+	{
+		BufferResource::Update (_deviceContext, vertices.data (), static_cast<size_t>(length * sizeof (T)), 0);
+	}
+
+private:
+
+	virtual const void * ProvideInitialData () const override
+	{
+		return bInitialize ? vertices.data () : nullptr;
+	}
+
+};
+
+template<typename T, bool bInitialize>
+class SimpleConstantBufferResource : public ConstantBufferResourceBase
+{
+
+public:
+
+	SimpleConstantBufferResource (bool _bImmutable) : ConstantBufferResourceBase { _bImmutable, GetBoundingConstantBufferSize (sizeof (T)) } {}
+
+	SimpleConstantBufferResource (bool _bImmutable, const T& _data) : ConstantBufferResourceBase { _bImmutable, sizeof (ind_t) }, data { _data } {}
+
+	SimpleConstantBufferResource (bool _bImmutable, const T&& _data) : ConstantBufferResourceBase { _bImmutable, sizeof (ind_t) }, data { _data } {}
 
 	T data;
-	bool bInitialize { false };
-
-	void Update (ID3D11DeviceContext& _deviceContext, int _size)
-	{
-		GAME_ASSERT_MSG (_size > 0 && _size < sizeof (T), "Invalid size");
-		BufferResource::Update (_deviceContext, &data, _size, 0);
-	}
 
 	void Update (ID3D11DeviceContext& _deviceContext)
 	{
-		Update (_deviceContext, static_cast<int>(sizeof (T)));
+		BufferResource::Update (_deviceContext, &data, sizeof (T), 0);
 	}
 
 private:
 
+	virtual const void * ProvideInitialData () const override
+	{
+		return bInitialize ? &data : nullptr;
+	}
 
 };
-
-*/
