@@ -4,7 +4,7 @@
 #include <Game/Utils/COMExceptions.hpp>
 
 #define SWAP_CHAIN_FORMAT DXGI_FORMAT_R8G8B8A8_UNORM
-#define FIRE_EVENT(x) { for (EngineListener* listener : Listeners) listener -> x ; }
+#define FIRE_EVENT(x) { for (EngineListener* listener : Listeners) listener -> x (*this) ; }
 
 
 DeviceHolder::DeviceHolder () {}
@@ -93,14 +93,14 @@ void DeviceHolder::Size (WindowSize _size, WindowRotation _rotation, bool _bForc
 		{
 			CreateRenderTarget ();
 		}
-		FIRE_EVENT (OnSized (*this));
+		FIRE_EVENT (OnSized);
 	}
 }
 
 void DeviceHolder::Destroy ()
 {
 	ReleaseAll ();
-	FIRE_EVENT (OnDeviceDestroyed ());
+	FIRE_EVENT (OnDeviceDestroyed);
 }
 
 void DeviceHolder::SetWindow (GAME_NATIVE_WINDOW_T _window, WindowSize _size, WindowRotation _rotation)
@@ -108,7 +108,7 @@ void DeviceHolder::SetWindow (GAME_NATIVE_WINDOW_T _window, WindowSize _size, Wi
 	if (!m_pDevice)
 	{
 		CreateDeviceAndDeviceContext ();
-		FIRE_EVENT (OnDeviceCreated (*this));
+		FIRE_EVENT (OnDeviceCreated);
 	}
 	m_NativeWindow = _window;
 	m_pSwapChain = nullptr;
@@ -290,9 +290,9 @@ void DeviceHolder::CreateRenderTarget ()
 void DeviceHolder::HandleDeviceLost ()
 {
 	ReleaseAll ();
-	FIRE_EVENT (OnDeviceDestroyed ());
+	FIRE_EVENT (OnDeviceDestroyed);
 	CreateDeviceAndDeviceContext ();
-	FIRE_EVENT (OnDeviceCreated (*this));
+	FIRE_EVENT (OnDeviceCreated);
 	CreateSwapChain ();
 	CreateRenderTarget ();
 }

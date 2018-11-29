@@ -13,17 +13,14 @@
     <Filter Include="Sources\Input">
       <UniqueIdentifier>{3f166d16-a573-459d-8810-2dec12d926bc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Rendering">
-      <UniqueIdentifier>{1082914b-2dd2-46c7-b1e3-e58b6c264c5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Resources">
-      <UniqueIdentifier>{6480c5ca-2ebd-4d69-b929-a5ec7f6edcdb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{6a2a538f-2831-4050-8778-1e38c948529c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Cinema 4D">
       <UniqueIdentifier>{7481a4b3-0ff4-4bdc-8be9-aada25179423}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Looper">
+      <UniqueIdentifier>{1082914b-2dd2-46c7-b1e3-e58b6c264c5d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,35 +36,11 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Exceptions.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Renderer.cpp">
-      <Filter>Sources\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Storage.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\BufferResources.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\InputLayoutResource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ResourceGroup.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Resource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\StateResources.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)TextureResource.cpp">
-      <Filter>Sources\Resources</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\ShaderResourceViewResource.cpp">
-      <Filter>Sources\Resources</Filter>
+    <ClCompile Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Looper.cpp">
+      <Filter>Sources\Looper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,12 +77,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Log.hpp">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Renderer.hpp">
-      <Filter>Sources\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\Resource.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Storage.hpp">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
@@ -119,29 +86,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\NonCopyable.hpp">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\InputLayoutResource.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\BufferResources.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResource.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ResourceGroup.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\StateResources.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderType.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\TextureResource.hpp">
-      <Filter>Sources\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Resources\ShaderResourceViewResource.hpp">
-      <Filter>Sources\Resources</Filter>
+    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Rendering\Looper.hpp">
+      <Filter>Sources\Looper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
