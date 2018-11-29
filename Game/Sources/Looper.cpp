@@ -1,25 +1,22 @@
-#include <Game/Rendering/Renderer.hpp>
+#include <Game/Looper/Looper.hpp>
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 #include <Game/DirectXMath.hpp>
 
-Renderer::Renderer (const DeviceHolder & _deviceHolder) : m_DeviceHolder { _deviceHolder }
+Looper::Looper (const DeviceHolder & _deviceHolder) : m_DeviceHolder { _deviceHolder }
 {}
 
-Renderer::~Renderer ()
+Looper::~Looper ()
 {}
 
-void Renderer::OnDeviceCreated (const DeviceHolder & deviceHolder)
+void Looper::OnDeviceCreated (const DeviceHolder & deviceHolder)
 {
 	ID3D11Device & device { *m_DeviceHolder.GetDevice () };
 
 }
 
-void Renderer::OnDeviceDestroyed ()
-{}
-
-void Renderer::OnSized (const DeviceHolder & deviceHolder)
+void Looper::OnSized (const DeviceHolder & deviceHolder)
 {
 	ID3D11Device * pDevice { m_DeviceHolder.GetDevice () };
 	WindowSize size = m_DeviceHolder.GetSize ();
@@ -34,7 +31,7 @@ void Renderer::OnSized (const DeviceHolder & deviceHolder)
 	}
 }
 
-void Renderer::Render (/*const Scene & _scene*/)
+void Looper::Render ()
 {
 	ID3D11DeviceContext & context { *m_DeviceHolder.GetDeviceContext () };
 	ID3D11RenderTargetView * const pRenderTargetView { m_DeviceHolder.GetRenderTargetView () };
@@ -52,5 +49,10 @@ void Renderer::Render (/*const Scene & _scene*/)
 		float color[4] { 1.0f, 0.2f, 0.2f, 1.0f };
 		context.ClearRenderTargetView (pRenderTargetView, color);
 	}
+
+}
+
+void Looper::OnDeviceDestroyed (const DeviceHolder& _deviceHolder)
+{
 
 }

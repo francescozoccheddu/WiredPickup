@@ -16,7 +16,7 @@ protected:
 
 	friend class DeviceHolder;
 
-	virtual void OnDeviceDestroyed () = 0;
+	virtual void OnDeviceDestroyed (const DeviceHolder& deviceHolder) = 0;
 
 	virtual void OnDeviceCreated (const DeviceHolder& deviceHolder) = 0;
 

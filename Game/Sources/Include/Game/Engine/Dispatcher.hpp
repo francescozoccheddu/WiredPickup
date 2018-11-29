@@ -1,5 +1,5 @@
 #include <Game/Engine/DeviceHolder.hpp>
-#include <Game/Rendering/Renderer.hpp>
+#include <Game/Looper/Looper.hpp>
 #include <Game/Utils/WindowRect.hpp>
 
 class Dispatcher
@@ -33,7 +33,7 @@ private:
 	bool m_bLastTimeValid { false };
 	LARGE_INTEGER m_LastTime;
 	DeviceHolder m_DeviceHolder;
-	Renderer m_Renderer { m_DeviceHolder };
+	Looper m_Looper { m_DeviceHolder };
 
 	void Render ();
 

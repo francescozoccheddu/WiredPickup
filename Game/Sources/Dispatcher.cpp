@@ -2,7 +2,6 @@
 
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/DirectXMath.hpp>
-#include <Game/Rendering/Renderer.hpp>
 
 #define MAX_DELTA_TIME 1.0
 
@@ -24,7 +23,7 @@ double Dispatcher::s_TimerFreq = 0.0;
 
 Dispatcher::Dispatcher ()
 {
-	m_DeviceHolder.Listeners.push_back (&m_Renderer);
+	m_DeviceHolder.Listeners.push_back (&m_Looper);
 	//m_DeviceHolder.Listeners.push_back (&m_Logic);
 }
 
@@ -69,7 +68,7 @@ Dispatcher::~Dispatcher ()
 
 void Dispatcher::Render ()
 {
-	m_Renderer.Render (/*m_Logic.GetScene ()*/);
+	m_Looper.Render (/*m_Logic.GetScene ()*/);
 	m_DeviceHolder.Present ();
 }
 
