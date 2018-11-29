@@ -28,7 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\Dispatcher.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Engine\EngineListener.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Input\Gamepad.hpp" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Rendering\Looper.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Looper\Looper.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\COMExceptions.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Exceptions.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\Log.hpp" />

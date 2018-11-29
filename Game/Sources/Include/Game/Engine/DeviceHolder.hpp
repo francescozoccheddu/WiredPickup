@@ -2,7 +2,6 @@
 
 #include <Game/Direct3D.hpp>
 #include <Game/Utils/WindowRect.hpp>
-#include <Game/Engine/EngineListener.hpp>
 #include <vector>
 
 #if GAME_PLATFORM == GAME_PLATFORM_UWP
@@ -15,6 +14,8 @@
 #else
 #error Unknown platform
 #endif
+
+class EngineListener;
 
 class DeviceHolder
 {

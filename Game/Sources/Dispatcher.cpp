@@ -24,7 +24,6 @@ double Dispatcher::s_TimerFreq = 0.0;
 Dispatcher::Dispatcher ()
 {
 	m_DeviceHolder.Listeners.push_back (&m_Looper);
-	//m_DeviceHolder.Listeners.push_back (&m_Logic);
 }
 
 void Dispatcher::Tick ()
@@ -68,7 +67,7 @@ Dispatcher::~Dispatcher ()
 
 void Dispatcher::Render ()
 {
-	m_Looper.Render (/*m_Logic.GetScene ()*/);
+	m_Looper.Render ();
 	m_DeviceHolder.Present ();
 }
 

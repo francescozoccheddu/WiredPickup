@@ -39,7 +39,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Storage.cpp">
       <Filter>Sources\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Looper.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)Sources\Looper.cpp">
       <Filter>Sources\Looper</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,7 +86,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Utils\NonCopyable.hpp">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Sources\Include\Game\Rendering\Looper.hpp">
+    <ClInclude Include="$(MSBuildThisFileDirectory)Sources\Include\Game\Looper\Looper.hpp">
       <Filter>Sources\Looper</Filter>
     </ClInclude>
   </ItemGroup>
