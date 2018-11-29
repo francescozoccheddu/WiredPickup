@@ -1,18 +1,6 @@
-cbuffer cbPerFrame
-{
-	float4x4 mProjView;
-};
-
-/*
-cbuffer cbPerDrawable
-{
-	float4x4 mModel;
-};
-*/
-
 struct VSIn
 {
-	float3 vPosition : POSITION;
+	float2 vPosition : POSITION;
 };
 
 struct VSOut
@@ -23,6 +11,6 @@ struct VSOut
 VSOut main (in VSIn _sIn)
 {
 	VSOut sOut;
-	sOut.vPosition = mul (float4(_sIn.vPosition, 1.0), mProjView);
+	sOut.vPosition = float4(_sIn.vPosition, 1.0, 1.0);
 	return sOut;
 }

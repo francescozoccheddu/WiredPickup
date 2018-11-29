@@ -1,5 +1,6 @@
 #include <Game/Engine/DeviceHolder.hpp>
 
+#include <Game/Engine/EngineListener.hpp>
 #include <Game/Utils/Exceptions.hpp>
 #include <Game/Utils/COMExceptions.hpp>
 
@@ -40,7 +41,7 @@ void DeviceHolder::Present ()
 	{
 		GAME_COMC (hResPresent);
 	}
-}
+	}
 
 void DeviceHolder::Size (WindowSize _size, WindowRotation _rotation, bool _bForce)
 {
