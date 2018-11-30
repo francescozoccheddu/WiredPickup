@@ -99,10 +99,10 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\c4d_mesh_exporter.py">
+    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\Test.c4d">
       <Filter>Cinema 4D</Filter>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\Test.c4d">
+    <None Include="C:\Users\franc\Documents\Visual Studio 2017\Projects\WiredPickup\Game\Cinema 4D\c4d_exporter.py">
       <Filter>Cinema 4D</Filter>
     </None>
   </ItemGroup>
