@@ -47,7 +47,9 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\c4d_mesh_exporter.py" />
+    <None Include="$(MSBuildThisFileDirectory)Cinema 4D\c4d_exporter.py">
+      <FileType>Document</FileType>
+    </None>
     <None Include="$(MSBuildThisFileDirectory)Cinema 4D\Test.c4d">
       <FileType>Document</FileType>
     </None>
